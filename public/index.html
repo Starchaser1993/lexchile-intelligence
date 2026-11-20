@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LexChile Intelligence | Plataforma de Inteligencia Jurídica y Litigación</title>
+  
+  <!-- Estilos CSS Vainilla Personalizados conforme a AGENTS.md -->
+  <link rel="stylesheet" href="css/tokens.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/viewer.css">
+  
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+  <div class="app-container">
+    
+    <!-- Header Superior -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-logo-icon">⚖️</div>
+        <div class="brand-text-wrapper">
+          <h1>
+            LexChile Intelligence
+            <span class="brand-badge">PRO ABOGADOS</span>
+          </h1>
+          <span class="brand-subtitle">Data Lake Judicial & Litigación Estratégica de Chile</span>
+        </div>
+      </div>
+
+      <div class="header-meta">
+        <div class="corpus-counter" title="Total de registros indexados en Google BigQuery">
+          <span class="live-dot"></span>
+          <span class="counter-value" id="totalCorpusCounter">505.561</span>
+          <span class="counter-label">Registros Activos</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Barra de Navegación por Módulos Jurídicos -->
+    <nav class="nav-tabs-bar" aria-label="Módulos Jurídicos">
+      <button class="nav-tab-btn active" data-tab="fallos" onclick="App.switchTab('fallos')">
+        <span>🏛️ Jurisprudencia PJUD</span>
+        <span class="tab-badge" id="tabBadgeFallos">186.095</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="causas" onclick="App.switchTab('causas')">
+        <span>📂 Expedientes 2026</span>
+        <span class="tab-badge" id="tabBadgeCausas">131.414</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="especiales" onclick="App.switchTab('especiales')">
+        <span>⚖️ Tribunales Especiales</span>
+        <span class="tab-badge" id="tabBadgeEspeciales">15.511</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="leyes" onclick="App.switchTab('leyes')">
+        <span>📜 Legislación BCN</span>
+        <span class="tab-badge" id="tabBadgeLeyes">62.697</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="doctrina-admin" onclick="App.switchTab('doctrina-admin')">
+        <span>🏢 CGR & SII</span>
+        <span class="tab-badge" id="tabBadgeDoctrinaAdmin">58.128</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="doctrina-juridica" onclick="App.switchTab('doctrina-juridica')">
+        <span>📚 Doctrina Académica</span>
+        <span class="tab-badge" id="tabBadgeDoctrinaJuridica">45.000</span>
+      </button>
+
+      <button class="nav-tab-btn" data-tab="formatos" onclick="App.switchTab('formatos')">
+        <span>📝 Formatos Forenses</span>
+        <span class="tab-badge" id="tabBadgeFormatos">4.102</span>
+      </button>
+    </nav>
+
+    <!-- Espacio de Trabajo Principal (Filtros Laterales + Resultados) -->
+    <main class="main-workspace">
+      
+      <!-- Panel Lateral de Filtros Específicos -->
+      <aside class="filters-sidebar">
+        <div class="filters-header">
+          <h3>Filtros Forenses</h3>
+          <button class="btn-clear-filters" onclick="App.clearAllFilters()">Restablecer</button>
+        </div>
+
+        <div id="filtersContainer" class="filters-content">
+          <!-- Se renderiza dinámicamente según la pestaña activa -->
+        </div>
+      </aside>
+
+      <!-- Panel de Contenido y Resultados -->
+      <section class="results-pane">
+        
+        <!-- Caja Omnisearch de Búsqueda Forense -->
+        <div class="search-box-container">
+          <div class="search-icon">🔍</div>
+          <input 
+            type="text" 
+            id="omniSearchInput" 
+            class="search-input" 
+            placeholder="Buscar por carátula, RIT, materia, ministros, considerandos o palabras clave..." 
+            autocomplete="off"
+            spellcheck="false"
+          />
+          <div class="search-actions">
+            <button id="btnSearch" class="btn-search">
+              Buscar
+            </button>
+          </div>
+        </div>
+
+        <!-- Barra de Estado y Resultados -->
+        <div class="results-meta-bar">
+          <div class="results-count">
+            Registros encontrados: <strong id="resultsCountVal">0</strong>
+          </div>
+          <div>
+            <span id="cacheIndicator" class="cache-pill" style="display:none;"></span>
+          </div>
+        </div>
+
+        <!-- Lista de Tarjetas de Resultados -->
+        <div id="resultsList" class="results-grid">
+          <!-- Renderizado dinámico -->
+        </div>
+
+        <!-- Paginación -->
+        <div id="paginationContainer" class="pagination-container">
+          <!-- Botones de página -->
+        </div>
+
+      </section>
+
+    </main>
+
+  </div>
+
+  <!-- Modal / Visor Forense de Documentos -->
+  <div id="documentModal" class="modal-overlay" role="dialog" aria-modal="true">
+    <div class="modal-container">
+      
+      <div class="modal-header">
+        <div class="modal-title-wrapper">
+          <h2 id="modalTitle">Detalle del Documento Judicial</h2>
+          <div class="modal-header-meta" id="modalMeta"></div>
+        </div>
+        <button class="btn-close-modal" onclick="App.closeModal()" title="Cerrar visor (Esc)">✕</button>
+      </div>
+
+      <!-- Banner de Cita Canónica Forense -->
+      <div class="canonical-citation-banner">
+        <div class="citation-text-box">
+          <span class="citation-label">Cita Canónica Forense (Copiar en Escrito):</span>
+          <span class="citation-string" id="modalCitationString"></span>
+        </div>
+        <button class="btn-action btn-action-gold" onclick="App.copyCitation(document.getElementById('modalCitationString').textContent)">
+          📋 Copiar Cita
+        </button>
+      </div>
+
+      <!-- Cuerpo Editorial de Lectura o Edición -->
+      <div class="modal-body" id="modalBody">
+        <!-- Contenido inyectado -->
+      </div>
+
+      <div class="modal-footer" id="modalFooter">
+        <!-- Acciones inyectadas -->
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Contenedor para Notificaciones Toast -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <!-- Scripts de la Aplicación -->
+  <script src="js/api.js"></script>
+  <script src="js/citations.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

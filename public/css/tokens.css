@@ -1,0 +1,93 @@
+:root {
+  /* Paleta de Fondos - Dark Mode Jurídico de Alto Rendimiento */
+  --bg-deep: #070a11;
+  --bg-surface: #0d121f;
+  --bg-card: #131b2e;
+  --bg-card-hover: #19233b;
+  --bg-elevated: #1e2a47;
+  --bg-glass: rgba(13, 18, 31, 0.75);
+  --bg-glass-card: rgba(19, 27, 46, 0.65);
+
+  /* Bordes y Separadores */
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --border-medium: rgba(255, 255, 255, 0.12);
+  --border-focus: rgba(212, 175, 55, 0.5);
+  --border-card: rgba(255, 255, 255, 0.08);
+
+  /* Acentos de Prestigio Legal */
+  --gold-primary: #d4af37;
+  --gold-hover: #e5c158;
+  --gold-glow: rgba(212, 175, 55, 0.25);
+  --gold-bg-subtle: rgba(212, 175, 55, 0.1);
+
+  --blue-legal: #2563eb;
+  --blue-hover: #3b82f6;
+  --blue-glow: rgba(37, 99, 235, 0.25);
+  --blue-bg-subtle: rgba(37, 99, 235, 0.12);
+
+  --teal-accent: #0d9488;
+  --emerald-success: #10b981;
+  --rose-danger: #f43f5e;
+  --amber-warning: #f59e0b;
+
+  /* Tipografía y Textos */
+  --text-main: #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted: #64748b;
+  --text-faint: #475569;
+  --text-gold: #f3d47c;
+
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --font-serif: 'Merriweather', 'Georgia', 'Cambria', serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+
+  /* Sombras y Elevaciones */
+  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.6);
+  --shadow-gold: 0 0 20px rgba(212, 175, 55, 0.15);
+
+  /* Radios y Espaciados */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 16px;
+  --radius-full: 9999px;
+
+  /* Transiciones */
+  --transition-fast: 0.15s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-normal: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-smooth: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-sans);
+  background-color: var(--bg-deep);
+  color: var(--text-main);
+  line-height: 1.5;
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-deep);
+}
+::-webkit-scrollbar-thumb {
+  background: #232e48;
+  border-radius: var(--radius-full);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--gold-primary);
+}
