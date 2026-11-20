@@ -11,17 +11,51 @@ const bqOptions = {
   location: LOCATION
 };
 
-if (process.env.GOOGLE_CREDENTIALS_JSON) {
+function getCredentials() {
+  const raw = process.env.GOOGLE_CREDENTIALS_JSON;
+  if (!raw) return null;
+  let str = raw.trim();
+  // Limpiar comillas externas si viene envuelto
+  if ((str.startsWith('"') && str.endsWith('"')) || (str.startsWith("'") && str.endsWith("'"))) {
+    try { str = JSON.parse(str); } catch (e) {}
+  }
+  let obj = null;
   try {
-    bqOptions.credentials = JSON.parse(process.env.GOOGLE_CREDENTIALS_JSON);
+    obj = JSON.parse(str);
   } catch (err) {
     try {
-      const decoded = Buffer.from(process.env.GOOGLE_CREDENTIALS_JSON, 'base64').toString('utf8');
-      bqOptions.credentials = JSON.parse(decoded);
+      const decoded = Buffer.from(str, 'base64').toString('utf8');
+      obj = JSON.parse(decoded);
     } catch (e) {
       console.error('Error parseando GOOGLE_CREDENTIALS_JSON:', e.message);
+      return null;
     }
   }
+  if (typeof obj === 'string') {
+    try { obj = JSON.parse(obj); } catch (e) {}
+  }
+  if (obj && typeof obj === 'object') {
+    let key = obj.private_key;
+    if (key) {
+      key = key.replace(/\\n/g, '\n');
+    }
+    return {
+      client_email: obj.client_email,
+      private_key: key,
+      project_id: obj.project_id
+    };
+  }
+  return null;
+}
+
+const parsedCreds = getCredentials();
+
+if (parsedCreds && parsedCreds.client_email && parsedCreds.private_key) {
+  bqOptions.projectId = parsedCreds.project_id || PROJECT_ID;
+  bqOptions.credentials = {
+    client_email: parsedCreds.client_email,
+    private_key: parsedCreds.private_key
+  };
 } else if (process.env.GCP_CLIENT_EMAIL && process.env.GCP_PRIVATE_KEY) {
   bqOptions.credentials = {
     client_email: process.env.GCP_CLIENT_EMAIL,
@@ -31,6 +65,8 @@ if (process.env.GOOGLE_CREDENTIALS_JSON) {
   bqOptions.keyFilename = process.env.GOOGLE_APPLICATION_CREDENTIALS;
 } else if (fs.existsSync(DEFAULT_KEY_PATH)) {
   bqOptions.keyFilename = DEFAULT_KEY_PATH;
+} else if (fs.existsSync('/home/starchaser/dev-ia/proyectos/pjud-jurisprudencia-pipeline/credentials/fallos-juridicos-key.json')) {
+  bqOptions.keyFilename = '/home/starchaser/dev-ia/proyectos/pjud-jurisprudencia-pipeline/credentials/fallos-juridicos-key.json';
 }
 
 const bq = new BigQuery(bqOptions);

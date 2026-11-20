@@ -39,7 +39,11 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'online',
     service: 'LexChile Intelligence API',
-    version: '1.0.0',
+    version: '1.0.1',
+    hasCredentials: !!process.env.GOOGLE_CREDENTIALS_JSON,
+    credentialsLength: process.env.GOOGLE_CREDENTIALS_JSON ? process.env.GOOGLE_CREDENTIALS_JSON.length : 0,
+    hasProjectId: !!process.env.GOOGLE_PROJECT_ID,
+    projectId: process.env.GOOGLE_PROJECT_ID || 'fallos-juridicos',
     timestamp: new Date().toISOString()
   });
 });
