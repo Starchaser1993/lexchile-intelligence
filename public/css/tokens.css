@@ -1,62 +1,69 @@
 :root {
-  /* Paleta de Fondos - Dark Mode Jurídico de Alto Rendimiento */
-  --bg-deep: #070a11;
-  --bg-surface: #0d121f;
-  --bg-card: #131b2e;
-  --bg-card-hover: #19233b;
-  --bg-elevated: #1e2a47;
-  --bg-glass: rgba(13, 18, 31, 0.75);
-  --bg-glass-card: rgba(19, 27, 46, 0.65);
+  /* Paleta Editorial de Papel y Tinta (Light Mode — Archivo Judicial) */
+  --bg-paper: #F7F6F2;
+  --bg-sidebar: #EFECE6;
+  --bg-surface: #FFFFFF;
+  --bg-surface-subtle: #FAF9F6;
+  --bg-surface-active: #F1EFE9;
 
-  /* Bordes y Separadores */
-  --border-subtle: rgba(255, 255, 255, 0.07);
-  --border-medium: rgba(255, 255, 255, 0.12);
-  --border-focus: rgba(212, 175, 55, 0.5);
-  --border-card: rgba(255, 255, 255, 0.08);
+  /* Líneas Divisoras y Bordes Color Piedra */
+  --border-stone: #DCD9D0;
+  --border-stone-light: #E8E5DC;
+  --border-stone-dark: #C3BEB2;
 
-  /* Acentos de Prestigio Legal */
-  --gold-primary: #d4af37;
-  --gold-hover: #e5c158;
-  --gold-glow: rgba(212, 175, 55, 0.25);
-  --gold-bg-subtle: rgba(212, 175, 55, 0.1);
+  /* Colores Institucionales Jurídicos */
+  --navy-judicial: #1B365D;
+  --navy-judicial-hover: #132744;
+  --navy-judicial-tint: #EEF2F7;
+  --navy-judicial-border: #C3CFE0;
 
-  --blue-legal: #2563eb;
-  --blue-hover: #3b82f6;
-  --blue-glow: rgba(37, 99, 235, 0.25);
-  --blue-bg-subtle: rgba(37, 99, 235, 0.12);
+  --burgundy-seal: #7C2D12;
+  --burgundy-seal-hover: #62220D;
+  --burgundy-seal-tint: #FAF0EC;
+  --burgundy-seal-border: #E0C4B8;
 
-  --teal-accent: #0d9488;
-  --emerald-success: #10b981;
-  --rose-danger: #f43f5e;
-  --amber-warning: #f59e0b;
+  /* Estado Sobrio de Archivo (Vigente / Acogido — sin neón) */
+  --forest-ink: #1F513B;
+  --forest-tint: #EFF5F2;
+  --forest-border: #C4DAD0;
 
-  /* Tipografía y Textos */
-  --text-main: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #64748b;
-  --text-faint: #475569;
-  --text-gold: #f3d47c;
+  /* Tintas y Tipografía */
+  --ink-primary: #18181B;
+  --ink-body: #3F3F46;
+  --ink-muted: #63636B;
+  --ink-subtle: #82828A;
 
-  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-  --font-serif: 'Merriweather', 'Georgia', 'Cambria', serif;
-  --font-mono: 'JetBrains Mono', 'Fira Code', 'Courier New', monospace;
+  /* Marcadores de Subrayado Forense */
+  --hl-ochre: #FBF0B2;
+  --hl-ochre-border: #E2CE6B;
+  --hl-seal: #F7D8CE;
+  --hl-seal-border: #D9A18E;
+  --hl-ink: #D8E6F5;
+  --hl-ink-border: #9EBCE0;
 
-  /* Sombras y Elevaciones */
-  --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.3);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.45);
-  --shadow-lg: 0 10px 25px rgba(0, 0, 0, 0.6);
-  --shadow-gold: 0 0 20px rgba(212, 175, 55, 0.15);
+  /* Familias Tipográficas Editoriales */
+  --font-serif-display: 'Libre Baskerville', 'Merriweather', Georgia, 'Times New Roman', serif;
+  --font-serif: 'Merriweather', 'Libre Baskerville', Georgia, 'Times New Roman', serif;
+  --font-sans: 'IBM Plex Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
-  /* Radios y Espaciados */
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 16px;
-  --radius-full: 9999px;
+  /* Radios Sobrios (Bordes rectos o apenas suavizados) */
+  --radius-xs: 2px;
+  --radius-sm: 3px;
+  --radius-md: 4px;
 
-  /* Transiciones */
-  --transition-fast: 0.15s cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-normal: 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-  --transition-smooth: 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+  /* Elevaciones Mínimas de Papel */
+  --shadow-drawer: -10px 0 30px rgba(24, 24, 27, 0.08);
+  --shadow-toast: 0 4px 16px rgba(24, 24, 27, 0.12);
+
+  /* Dimensiones Estructurales */
+  --header-height: 64px;
+  --tabs-height: 44px;
+  --sidebar-width: 260px;
+
+  /* Transiciones Discretas */
+  --transition-fast: 0.14s ease;
+  --transition-normal: 0.24s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 *, *::before, *::after {
@@ -65,29 +72,43 @@
   padding: 0;
 }
 
+html {
+  font-size: 16px;
+  background-color: var(--bg-paper);
+}
+
 body {
   font-family: var(--font-sans);
-  background-color: var(--bg-deep);
-  color: var(--text-main);
-  line-height: 1.5;
+  background-color: var(--bg-paper);
+  color: var(--ink-body);
+  line-height: 1.55;
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Scrollbar personalizada */
+/* Selección de texto editorial */
+::selection {
+  background: var(--hl-ochre);
+  color: var(--ink-primary);
+}
+
+/* Scrollbar discreta de papel y piedra */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
 }
+
 ::-webkit-scrollbar-track {
-  background: var(--bg-deep);
+  background: var(--bg-paper);
 }
+
 ::-webkit-scrollbar-thumb {
-  background: #232e48;
-  border-radius: var(--radius-full);
+  background: #CCC7BC;
+  border-radius: var(--radius-xs);
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: var(--gold-primary);
+  background: #A9A396;
 }

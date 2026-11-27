@@ -3,40 +3,44 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>LexChile Intelligence | Plataforma de Inteligencia Jurídica y Litigación</title>
-  
+  <title>LexChile Intelligence | Archivo Judicial e Inteligencia Jurídica</title>
+
+  <!-- Tipografía Editorial: Libre Baskerville, Merriweather, IBM Plex Sans & Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300;1,400&display=swap" rel="stylesheet">
+
   <!-- Estilos CSS Vainilla Personalizados conforme a AGENTS.md -->
   <link rel="stylesheet" href="css/tokens.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/components.css">
   <link rel="stylesheet" href="css/viewer.css">
-  
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Merriweather:ital,wght@0,300;0,400;0,700;1,300&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
 
   <div class="app-container">
-    
-    <!-- Header Superior -->
+
+    <!-- Cabecera Editorial Institucional -->
     <header class="app-header">
       <div class="brand-section">
-        <div class="brand-logo-icon">⚖️</div>
+        <div class="brand-seal" aria-hidden="true">§</div>
         <div class="brand-text-wrapper">
           <h1>
             LexChile Intelligence
-            <span class="brand-badge">PRO ABOGADOS</span>
+            <span class="brand-badge">Archivo Judicial</span>
           </h1>
-          <span class="brand-subtitle">Data Lake Judicial & Litigación Estratégica de Chile</span>
+          <span class="brand-subtitle">Repertorio de Jurisprudencia, Legislación y Doctrina de Chile</span>
         </div>
       </div>
 
       <div class="header-meta">
+        <button type="button" class="btn-toggle-filters" onclick="App.toggleMobileFilters()" aria-label="Mostrar u ocultar filtros">
+          Filtros
+        </button>
         <div class="corpus-counter" title="Total de registros indexados en Google BigQuery">
-          <span class="live-dot"></span>
+          <span class="corpus-dot" aria-hidden="true"></span>
           <span class="counter-value" id="totalCorpusCounter">505.561</span>
-          <span class="counter-label">Registros Activos</span>
+          <span class="counter-label">Registros</span>
         </div>
       </div>
     </header>
@@ -44,49 +48,49 @@
     <!-- Barra de Navegación por Módulos Jurídicos -->
     <nav class="nav-tabs-bar" aria-label="Módulos Jurídicos">
       <button class="nav-tab-btn active" data-tab="fallos" onclick="App.switchTab('fallos')">
-        <span>🏛️ Jurisprudencia PJUD</span>
+        <span>Jurisprudencia PJUD</span>
         <span class="tab-badge" id="tabBadgeFallos">186.095</span>
       </button>
 
       <button class="nav-tab-btn" data-tab="causas" onclick="App.switchTab('causas')">
-        <span>📂 Expedientes 2026</span>
+        <span>Expedientes 2026</span>
         <span class="tab-badge" id="tabBadgeCausas">131.414</span>
       </button>
 
       <button class="nav-tab-btn" data-tab="especiales" onclick="App.switchTab('especiales')">
-        <span>⚖️ Tribunales Especiales</span>
+        <span>Tribunales Especiales</span>
         <span class="tab-badge" id="tabBadgeEspeciales">15.511</span>
       </button>
 
       <button class="nav-tab-btn" data-tab="leyes" onclick="App.switchTab('leyes')">
-        <span>📜 Legislación BCN</span>
+        <span>Legislación BCN</span>
         <span class="tab-badge" id="tabBadgeLeyes">62.697</span>
       </button>
 
       <button class="nav-tab-btn" data-tab="doctrina-admin" onclick="App.switchTab('doctrina-admin')">
-        <span>🏢 CGR & SII</span>
+        <span>CGR y SII</span>
         <span class="tab-badge" id="tabBadgeDoctrinaAdmin">58.128</span>
       </button>
 
       <button class="nav-tab-btn" data-tab="doctrina-juridica" onclick="App.switchTab('doctrina-juridica')">
-        <span>📚 Doctrina Académica</span>
+        <span>Doctrina Académica</span>
         <span class="tab-badge" id="tabBadgeDoctrinaJuridica">45.000</span>
       </button>
 
       <button class="nav-tab-btn" data-tab="formatos" onclick="App.switchTab('formatos')">
-        <span>📝 Formatos Forenses</span>
+        <span>Formatos Forenses</span>
         <span class="tab-badge" id="tabBadgeFormatos">4.102</span>
       </button>
     </nav>
 
-    <!-- Espacio de Trabajo Principal (Filtros Laterales + Resultados) -->
+    <!-- Espacio de Trabajo Principal (Split-View Jurídico: Filtros 260px + Lista Documental + Drawer Derecho) -->
     <main class="main-workspace">
-      
-      <!-- Panel Lateral de Filtros Específicos -->
-      <aside class="filters-sidebar">
+
+      <!-- Barra Lateral Izquierda de Filtros (#EFECE6, 260px) -->
+      <aside id="filtersSidebar" class="filters-sidebar" aria-label="Filtros de archivo">
         <div class="filters-header">
-          <h3>Filtros Forenses</h3>
-          <button class="btn-clear-filters" onclick="App.clearAllFilters()">Restablecer</button>
+          <h3>Filtros del Archivo</h3>
+          <button type="button" class="btn-clear-filters" onclick="App.clearAllFilters()">Restablecer</button>
         </div>
 
         <div id="filtersContainer" class="filters-content">
@@ -94,28 +98,33 @@
         </div>
       </aside>
 
-      <!-- Panel de Contenido y Resultados -->
+      <!-- Área Central de Resultados (Lista Bibliográfica Documental) -->
       <section class="results-pane">
-        
+
         <!-- Caja Omnisearch de Búsqueda Forense -->
         <div class="search-box-container">
-          <div class="search-icon">🔍</div>
-          <input 
-            type="text" 
-            id="omniSearchInput" 
-            class="search-input" 
-            placeholder="Buscar por carátula, RIT, materia, ministros, considerandos o palabras clave..." 
+          <div class="search-icon" aria-hidden="true">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </div>
+          <input
+            type="text"
+            id="omniSearchInput"
+            class="search-input"
+            placeholder="Buscar por carátula, rol, RIT, materia, ministros, considerandos o palabras clave..."
             autocomplete="off"
             spellcheck="false"
           />
           <div class="search-actions">
-            <button id="btnSearch" class="btn-search">
+            <button type="button" id="btnSearch" class="btn-search">
               Buscar
             </button>
           </div>
         </div>
 
-        <!-- Barra de Estado y Resultados -->
+        <!-- Barra de Estado y Conteo de Resultados -->
         <div class="results-meta-bar">
           <div class="results-count">
             Registros encontrados: <strong id="resultsCountVal">0</strong>
@@ -125,9 +134,9 @@
           </div>
         </div>
 
-        <!-- Lista de Tarjetas de Resultados -->
-        <div id="resultsList" class="results-grid">
-          <!-- Renderizado dinámico -->
+        <!-- Lista Documental Separada por Líneas Horizontales (divide-y) -->
+        <div id="resultsList" class="results-grid" role="list">
+          <!-- Renderizado dinámico de fichas bibliográficas -->
         </div>
 
         <!-- Paginación -->
@@ -141,40 +150,84 @@
 
   </div>
 
-  <!-- Modal / Visor Forense de Documentos -->
-  <div id="documentModal" class="modal-overlay" role="dialog" aria-modal="true">
-    <div class="modal-container">
-      
-      <div class="modal-header">
-        <div class="modal-title-wrapper">
-          <h2 id="modalTitle">Detalle del Documento Judicial</h2>
-          <div class="modal-header-meta" id="modalMeta"></div>
-        </div>
-        <button class="btn-close-modal" onclick="App.closeModal()" title="Cerrar visor (Esc)">✕</button>
-      </div>
+  <!-- Backdrop para pantallas donde el Drawer se superpone -->
+  <div id="drawerBackdrop" class="drawer-backdrop" onclick="App.closeModal()"></div>
 
-      <!-- Banner de Cita Canónica Forense -->
-      <div class="canonical-citation-banner">
-        <div class="citation-text-box">
-          <span class="citation-label">Cita Canónica Forense (Copiar en Escrito):</span>
-          <span class="citation-string" id="modalCitationString"></span>
+  <!-- Panel Lateral Derecho de Lectura (Drawer / Split-View Jurídico) -->
+  <aside id="documentModal" class="reading-drawer" role="dialog" aria-modal="false" aria-labelledby="modalTitle">
+
+    <div class="drawer-header">
+      <div class="drawer-title-wrapper">
+        <span class="drawer-kicker" id="modalKicker">Ficha del Archivo Judicial</span>
+        <h2 id="modalTitle">Detalle del Documento Judicial</h2>
+        <div class="drawer-header-meta" id="modalMeta"></div>
+      </div>
+      <div class="drawer-header-actions">
+        <button type="button" class="btn-icon-drawer" id="btnExpandDrawer" onclick="App.toggleDrawerWidth()" title="Ampliar o reducir panel de lectura" aria-label="Ampliar panel">
+          ↔
+        </button>
+        <button type="button" class="btn-icon-drawer btn-close-modal" onclick="App.closeModal()" title="Cerrar panel (Esc)" aria-label="Cerrar panel">
+          ✕
+        </button>
+      </div>
+    </div>
+
+    <!-- Banner de Cita Formateada con Selector de Estilo -->
+    <div class="canonical-citation-banner">
+      <div class="citation-top-row">
+        <span class="citation-label">Cita Formateada para Escrito</span>
+        <div class="citation-style-switcher" role="group" aria-label="Formato de cita">
+          <button type="button" class="btn-cit-style active" data-style="forense" onclick="App.setCitationStyle('forense')">Forense</button>
+          <button type="button" class="btn-cit-style" data-style="academica" onclick="App.setCitationStyle('academica')">Académica</button>
+          <button type="button" class="btn-cit-style" data-style="abreviada" onclick="App.setCitationStyle('abreviada')">Abreviada</button>
         </div>
-        <button class="btn-action btn-action-gold" onclick="App.copyCitation(document.getElementById('modalCitationString').textContent)">
-          📋 Copiar Cita
+      </div>
+      <div class="citation-content-row">
+        <span class="citation-string" id="modalCitationString"></span>
+        <button type="button" class="btn-action btn-action-primary" onclick="App.copyCurrentCitation()">
+          Copiar Cita
+        </button>
+      </div>
+    </div>
+
+    <!-- Barra de Herramientas de Subrayado y Ergonomía de Lectura -->
+    <div class="reading-toolbar" id="readingToolbar">
+      <div class="toolbar-group">
+        <span class="toolbar-label">Subrayar:</span>
+        <button type="button" class="btn-hl" data-color="ochre" onclick="App.applyHighlight('ochre')" title="Subrayar texto seleccionado en ocre (Doctrina clave)">
+          <span class="hl-swatch hl-swatch-ochre"></span>Doctrina
+        </button>
+        <button type="button" class="btn-hl" data-color="seal" onclick="App.applyHighlight('seal')" title="Subrayar texto seleccionado en lacre (Punto controvertido)">
+          <span class="hl-swatch hl-swatch-seal"></span>Lacre
+        </button>
+        <button type="button" class="btn-hl" data-color="ink" onclick="App.applyHighlight('ink')" title="Subrayar texto seleccionado en azul tinta (Normativa)">
+          <span class="hl-swatch hl-swatch-ink"></span>Norma
+        </button>
+        <span id="highlightCountBadge" class="hl-counter" style="display:none;">0</span>
+        <button type="button" id="btnCopyHighlights" class="btn-hl" style="display:none;" onclick="App.copyHighlightedExcerpts()" title="Copiar todos los extractos subrayados con su cita formateada">
+          Copiar extractos
+        </button>
+        <button type="button" id="btnClearHighlights" class="btn-hl" style="display:none;" onclick="App.clearHighlights()" title="Eliminar subrayados de este documento">
+          Limpiar
         </button>
       </div>
 
-      <!-- Cuerpo Editorial de Lectura o Edición -->
-      <div class="modal-body" id="modalBody">
-        <!-- Contenido inyectado -->
+      <div class="toolbar-group">
+        <button type="button" class="btn-font-ctrl" onclick="App.adjustReadingFont(-1)" title="Reducir tamaño de lectura">A−</button>
+        <button type="button" class="btn-font-ctrl" onclick="App.adjustReadingFont(1)" title="Aumentar tamaño de lectura">A+</button>
       </div>
-
-      <div class="modal-footer" id="modalFooter">
-        <!-- Acciones inyectadas -->
-      </div>
-
     </div>
-  </div>
+
+    <!-- Cuerpo Editorial de Lectura o Edición (max-w-prose) -->
+    <div class="drawer-body" id="modalBody">
+      <!-- Contenido inyectado -->
+    </div>
+
+    <div class="drawer-footer" id="modalFooter">
+      <!-- Acciones inyectadas -->
+    </div>
+
+  </aside>
 
   <!-- Contenedor para Notificaciones Toast -->
   <div id="toastContainer" class="toast-container"></div>

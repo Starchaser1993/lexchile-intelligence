@@ -1,7 +1,7 @@
-// Capa de Renderizado e Interfaz de Usuario
+// Capa de Renderizado e Interfaz Editorial — Archivo Judicial
 const UI = (() => {
 
-  function showToast(message, type = 'info') {
+  function showToast(message) {
     let container = document.getElementById('toastContainer');
     if (!container) {
       container = document.createElement('div');
@@ -13,17 +13,17 @@ const UI = (() => {
     const toast = document.createElement('div');
     toast.className = 'toast';
     toast.innerHTML = `
-      <span style="color: var(--gold-primary);">⚖️</span>
-      <span>${message}</span>
+      <span aria-hidden="true">§</span>
+      <span>${escapeHtml(message)}</span>
     `;
     container.appendChild(toast);
 
     setTimeout(() => {
       toast.style.opacity = '0';
-      toast.style.transform = 'translateY(10px)';
-      toast.style.transition = 'all 0.3s ease';
-      setTimeout(() => toast.remove(), 300);
-    }, 3200);
+      toast.style.transform = 'translateY(8px)';
+      toast.style.transition = 'all 0.25s ease';
+      setTimeout(() => toast.remove(), 260);
+    }, 3000);
   }
 
   function renderSkeletons(container, count = 5) {
@@ -32,7 +32,7 @@ const UI = (() => {
       html += `
         <div class="skeleton-card">
           <div class="skeleton-line short"></div>
-          <div class="skeleton-line medium" style="height: 22px;"></div>
+          <div class="skeleton-line medium"></div>
           <div class="skeleton-line full"></div>
           <div class="skeleton-line full"></div>
         </div>
@@ -42,7 +42,7 @@ const UI = (() => {
   }
 
   function escapeHtml(str) {
-    if (!str) return '';
+    if (str === null || str === undefined) return '';
     return String(str)
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -51,34 +51,33 @@ const UI = (() => {
       .replace(/'/g, '&#039;');
   }
 
-  // Tarjeta de Jurisprudencia PJUD 2026
-  function renderFalloCard(f) {
+  // Ficha Bibliográfica: Jurisprudencia PJUD
+  function renderFalloCard(f, selectedId = null) {
     const citation = Citations.generateFalloCitation(f);
     const dateFormatted = Citations.formatDateCL(f.fecha_sentencia);
-    const resClass = f.resultado_recurso && f.resultado_recurso.toLowerCase().includes('acog') 
-      ? 'badge-resultado-acogido' 
-      : 'badge-resultado-rechazado';
+    const isAcogido = f.resultado_recurso && f.resultado_recurso.toLowerCase().includes('acog');
+    const resClass = isAcogido ? 'badge-resultado-acogido' : 'badge-resultado-rechazado';
+    const isSelected = selectedId && String(selectedId) === String(f.id_fallo);
 
     return `
-      <div class="legal-card" data-id="${escapeHtml(f.id_fallo)}" data-type="fallo">
+      <article class="legal-card ${isSelected ? 'is-selected' : ''}" role="listitem" data-id="${escapeHtml(f.id_fallo)}" data-type="fallo">
         <div class="card-header">
           <div class="badge-cluster">
-            ${f.corte ? `<span class="badge badge-corte">🏛️ ${escapeHtml(f.corte)}</span>` : ''}
+            ${f.corte ? `<span class="badge badge-corte">${escapeHtml(f.corte)}</span>` : ''}
             ${f.sala ? `<span class="badge badge-tribunal">${escapeHtml(f.sala)}</span>` : ''}
-            ${f.tipo_recurso ? `<span class="badge badge-recurso">⚖️ ${escapeHtml(f.tipo_recurso)}</span>` : ''}
+            ${f.tipo_recurso ? `<span class="badge badge-recurso">${escapeHtml(f.tipo_recurso)}</span>` : ''}
             ${f.resultado_recurso ? `<span class="badge ${resClass}">${escapeHtml(f.resultado_recurso)}</span>` : ''}
           </div>
-          <span class="badge-date">📅 ${dateFormatted || f.fecha_sentencia || '2026'}</span>
+          <time class="badge-date">${escapeHtml(dateFormatted || f.fecha_sentencia || '2026')}</time>
         </div>
 
         <h3 class="card-title" onclick="App.openDetail('fallo', '${escapeHtml(f.id_fallo)}')">
-          ${escapeHtml(f.caratulado || 'Sentencia sin carátula formal')}
-          ${f.rol_numero ? `<span style="font-weight:400; color:var(--text-muted); font-size:0.9rem;">(Rol ${escapeHtml(f.rol_numero)})</span>` : ''}
+          ${escapeHtml(f.caratulado || 'Sentencia sin carátula formal')}${f.rol_numero ? `<span class="card-rol-inline">Rol ${escapeHtml(f.rol_numero)}</span>` : ''}
         </h3>
 
         ${f.descriptores_juridicos || f.materia ? `
           <div class="card-descriptors">
-            <span style="color:var(--text-muted); font-size:0.75rem;">Materia:</span>
+            <span class="descriptor-label">Materia:</span>
             <span class="descriptor-tag">${escapeHtml(f.materia || 'General')}</span>
             ${f.descriptores_juridicos ? `<span class="descriptor-tag">${escapeHtml(f.descriptores_juridicos)}</span>` : ''}
           </div>
@@ -93,58 +92,59 @@ const UI = (() => {
             ${escapeHtml(citation)}
           </div>
           <div class="card-btn-group">
-            <button class="btn-action btn-action-gold" onclick="App.copyCitation('${escapeHtml(citation)}')">
-              📋 Copiar Cita
+            <button type="button" class="btn-action" data-citation="${escapeHtml(citation)}" onclick="App.copyCitationFromBtn(this)">
+              Copiar Cita
             </button>
-            <button class="btn-action btn-action-primary" onclick="App.openDetail('fallo', '${escapeHtml(f.id_fallo)}')">
-              🔍 Ver Fallo
+            <button type="button" class="btn-action btn-action-primary" onclick="App.openDetail('fallo', '${escapeHtml(f.id_fallo)}')">
+              Ver Fallo
             </button>
             ${f.url_acceso_sentencia ? `
               <a href="${escapeHtml(f.url_acceso_sentencia)}" target="_blank" rel="noopener noreferrer" class="btn-action">
-                📄 Doc PJUD
+                Doc PJUD ↗
               </a>
             ` : ''}
           </div>
         </div>
-      </div>
+      </article>
     `;
   }
 
-  // Tarjeta de Causa Judicial 2026
-  function renderCausaCard(c) {
+  // Ficha Bibliográfica: Expediente Judicial 2026
+  function renderCausaCard(c, selectedId = null) {
     const citation = Citations.generateCausaCitation(c);
     const dateFormatted = Citations.formatDateCL(c.fecha_ingreso);
+    const isSelected = selectedId && String(selectedId) === String(c.id_causa);
 
     return `
-      <div class="legal-card" data-id="${escapeHtml(c.id_causa)}" data-type="causa">
+      <article class="legal-card ${isSelected ? 'is-selected' : ''}" role="listitem" data-id="${escapeHtml(c.id_causa)}" data-type="causa">
         <div class="card-header">
           <div class="badge-cluster">
-            <span class="badge badge-corte">⚖️ RIT: ${escapeHtml(c.rit || 'S/R')}</span>
-            ${c.ruc ? `<span class="badge badge-tribunal">RUC: ${escapeHtml(c.ruc)}</span>` : ''}
-            ${c.competencia ? `<span class="badge badge-recurso">${escapeHtml(c.competencia)}</span>` : ''}
+            <span class="badge badge-corte">RIT ${escapeHtml(c.rit || 'S/R')}</span>
+            ${c.ruc ? `<span class="badge badge-tribunal">RUC ${escapeHtml(c.ruc)}</span>` : ''}
+            ${c.competencia ? `<span class="badge badge-seal">${escapeHtml(c.competencia)}</span>` : ''}
           </div>
-          <span class="badge-date">📅 Ingreso: ${dateFormatted || c.fecha_ingreso || '2026'}</span>
+          <time class="badge-date">Ingreso: ${escapeHtml(dateFormatted || c.fecha_ingreso || '2026')}</time>
         </div>
 
         <h3 class="card-title" onclick="App.openDetail('causa', '${escapeHtml(c.id_causa)}')">
           ${escapeHtml(c.caratulado || 'Causa judicial 2026')}
         </h3>
 
-        <div class="litigation-parties-box" style="padding: 10px 14px; margin-top: 4px;">
-          <div class="litigation-side">
-            <h4>🔵 Demandante / Querellante / Fiscal:</h4>
-            <p style="font-size: 0.85rem;">${escapeHtml(c.demandante_o_fiscal || 'No especificado en carátula')}</p>
+        <div class="card-parties-row">
+          <div class="card-party-col">
+            <h4>Demandante / Querellante / Fiscal</h4>
+            <p>${escapeHtml(c.demandante_o_fiscal || 'No especificado en carátula')}</p>
           </div>
-          <div class="litigation-side">
-            <h4>🔴 Demandado / Imputado:</h4>
-            <p style="font-size: 0.85rem;">${escapeHtml(c.demandado_o_imputado || 'No individualizado')}</p>
+          <div class="card-party-col party-defendant">
+            <h4>Demandado / Imputado</h4>
+            <p>${escapeHtml(c.demandado_o_imputado || 'No individualizado')}</p>
           </div>
         </div>
 
         <div class="card-descriptors">
-          <span style="color:var(--text-muted); font-size:0.75rem;">Tribunal:</span>
+          <span class="descriptor-label">Tribunal:</span>
           <span class="descriptor-tag">${escapeHtml(c.tribunal || 'PJUD')}</span>
-          ${c.procedimiento ? `<span class="descriptor-tag">Proc: ${escapeHtml(c.procedimiento)}</span>` : ''}
+          ${c.procedimiento ? `<span class="descriptor-tag">Proc. ${escapeHtml(c.procedimiento)}</span>` : ''}
           ${c.materia_o_delito ? `<span class="descriptor-tag">${escapeHtml(c.materia_o_delito)}</span>` : ''}
         </div>
 
@@ -153,32 +153,33 @@ const UI = (() => {
             ${escapeHtml(citation)}
           </div>
           <div class="card-btn-group">
-            <button class="btn-action btn-action-gold" onclick="App.copyCitation('${escapeHtml(citation)}')">
-              📋 Copiar Ficha
+            <button type="button" class="btn-action" data-citation="${escapeHtml(citation)}" onclick="App.copyCitationFromBtn(this)">
+              Copiar Ficha
             </button>
-            <button class="btn-action btn-action-primary" onclick="App.openDetail('causa', '${escapeHtml(c.id_causa)}')">
-              🔍 Ver Expediente
+            <button type="button" class="btn-action btn-action-primary" onclick="App.openDetail('causa', '${escapeHtml(c.id_causa)}')">
+              Ver Expediente
             </button>
           </div>
         </div>
-      </div>
+      </article>
     `;
   }
 
-  // Tarjeta de Tribunales Especiales
-  function renderEspecialCard(e) {
+  // Ficha Bibliográfica: Tribunales Especiales
+  function renderEspecialCard(e, selectedId = null) {
     const citation = Citations.generateEspecialCitation(e);
     const dateFormatted = Citations.formatDateCL(e.fecha_dictacion);
+    const isSelected = selectedId && String(selectedId) === String(e.id_fallo);
 
     return `
-      <div class="legal-card" data-id="${escapeHtml(e.id_fallo)}" data-type="especial">
+      <article class="legal-card ${isSelected ? 'is-selected' : ''}" role="listitem" data-id="${escapeHtml(e.id_fallo)}" data-type="especial">
         <div class="card-header">
           <div class="badge-cluster">
-            <span class="badge badge-corte">🏛️ ${escapeHtml(e.tribunal || 'Tribunal Especial')}</span>
-            ${e.rol_causa ? `<span class="badge badge-tribunal">Rol ${escapeHtml(e.rol_causa)}</span>` : ''}
+            <span class="badge badge-corte">${escapeHtml(e.tribunal || 'Tribunal Especial')}</span>
+            ${e.rol_causa ? `<span class="badge badge-seal">Rol ${escapeHtml(e.rol_causa)}</span>` : ''}
             ${e.tipo_procedimiento ? `<span class="badge badge-recurso">${escapeHtml(e.tipo_procedimiento)}</span>` : ''}
           </div>
-          <span class="badge-date">📅 ${dateFormatted || e.fecha_dictacion || ''}</span>
+          <time class="badge-date">${escapeHtml(dateFormatted || e.fecha_dictacion || '')}</time>
         </div>
 
         <h3 class="card-title" onclick="App.openDetail('especial', '${escapeHtml(e.id_fallo)}')">
@@ -187,7 +188,7 @@ const UI = (() => {
 
         ${e.materias_conductas ? `
           <div class="card-descriptors">
-            <span style="color:var(--text-muted); font-size:0.75rem;">Materia/Conducta:</span>
+            <span class="descriptor-label">Materia / Conducta:</span>
             <span class="descriptor-tag">${escapeHtml(e.materias_conductas)}</span>
           </div>
         ` : ''}
@@ -201,38 +202,39 @@ const UI = (() => {
             ${escapeHtml(citation)}
           </div>
           <div class="card-btn-group">
-            <button class="btn-action btn-action-gold" onclick="App.copyCitation('${escapeHtml(citation)}')">
-              📋 Copiar Cita
+            <button type="button" class="btn-action" data-citation="${escapeHtml(citation)}" onclick="App.copyCitationFromBtn(this)">
+              Copiar Cita
             </button>
-            <button class="btn-action btn-action-primary" onclick="App.openDetail('especial', '${escapeHtml(e.id_fallo)}')">
-              🔍 Ver Fallo
+            <button type="button" class="btn-action btn-action-primary" onclick="App.openDetail('especial', '${escapeHtml(e.id_fallo)}')">
+              Ver Fallo
             </button>
             ${e.url_origen ? `
               <a href="${escapeHtml(e.url_origen)}" target="_blank" rel="noopener noreferrer" class="btn-action">
-                🌐 Fuente Oficial
+                Fuente Oficial ↗
               </a>
             ` : ''}
           </div>
         </div>
-      </div>
+      </article>
     `;
   }
 
-  // Tarjeta de Legislación y Códigos BCN
-  function renderLeyCard(l) {
+  // Ficha Bibliográfica: Legislación y Códigos BCN
+  function renderLeyCard(l, selectedId = null) {
     const citation = Citations.generateLeyCitation(l);
     const dateFormatted = Citations.formatDateCL(l.fecha_publicacion);
     const isCodigo = l.tipo_norma === 'Código' || (l.titulo_norma && l.titulo_norma.toLowerCase().includes('código'));
+    const isSelected = selectedId && String(selectedId) === String(l.id_norma);
 
     return `
-      <div class="legal-card" data-id="${escapeHtml(l.id_norma)}" data-type="ley" style="${isCodigo ? 'border-left: 4px solid var(--gold-primary);' : ''}">
+      <article class="legal-card ${isSelected ? 'is-selected' : ''}" role="listitem" data-id="${escapeHtml(l.id_norma)}" data-type="ley">
         <div class="card-header">
           <div class="badge-cluster">
-            <span class="badge badge-corte">${isCodigo ? '📖 ' : '📜 '}${escapeHtml(l.tipo_norma || 'Norma')} ${escapeHtml(l.numero_norma || '')}</span>
+            <span class="badge ${isCodigo ? 'badge-seal' : 'badge-corte'}">${escapeHtml(l.tipo_norma || 'Norma')} ${escapeHtml(l.numero_norma || '')}</span>
             ${l.organismo_emisor ? `<span class="badge badge-tribunal">${escapeHtml(l.organismo_emisor)}</span>` : ''}
             <span class="badge badge-resultado-acogido">Vigente</span>
           </div>
-          <span class="badge-date">📅 DO: ${dateFormatted || l.fecha_publicacion || ''}</span>
+          <time class="badge-date">DO: ${escapeHtml(dateFormatted || l.fecha_publicacion || '')}</time>
         </div>
 
         <h3 class="card-title" onclick="App.openDetail('ley', '${escapeHtml(l.id_norma)}')">
@@ -241,8 +243,8 @@ const UI = (() => {
 
         ${l.nombres_uso_comun ? `
           <div class="card-descriptors">
-            <span style="color:var(--text-muted); font-size:0.75rem;">Nombre común:</span>
-            <span class="descriptor-tag" style="color: var(--text-gold); font-weight: 600;">⭐ ${escapeHtml(l.nombres_uso_comun)}</span>
+            <span class="descriptor-label">Nombre común:</span>
+            <span class="descriptor-tag descriptor-tag-accent">${escapeHtml(l.nombres_uso_comun)}</span>
           </div>
         ` : ''}
 
@@ -255,37 +257,38 @@ const UI = (() => {
             ${escapeHtml(citation)}
           </div>
           <div class="card-btn-group">
-            <button class="btn-action btn-action-gold" onclick="App.copyCitation('${escapeHtml(citation)}')">
-              📋 Cita Oficial
+            <button type="button" class="btn-action" data-citation="${escapeHtml(citation)}" onclick="App.copyCitationFromBtn(this)">
+              Cita Oficial
             </button>
-            <button class="btn-action btn-action-primary" onclick="App.openDetail('ley', '${escapeHtml(l.id_norma)}')">
-              🔍 Ver Ficha
+            <button type="button" class="btn-action btn-action-primary" onclick="App.openDetail('ley', '${escapeHtml(l.id_norma)}')">
+              Ver Ficha
             </button>
             ${l.url_leychile ? `
               <a href="${escapeHtml(l.url_leychile)}" target="_blank" rel="noopener noreferrer" class="btn-action">
-                🏛️ Ley Chile BCN
+                LeyChile BCN ↗
               </a>
             ` : ''}
           </div>
         </div>
-      </div>
+      </article>
     `;
   }
 
-  // Tarjeta de Doctrina Administrativa (CGR / SII)
-  function renderDoctrinaAdminCard(d) {
+  // Ficha Bibliográfica: Doctrina Administrativa (CGR / SII)
+  function renderDoctrinaAdminCard(d, selectedId = null) {
     const citation = Citations.generateDoctrinaAdminCitation(d);
     const dateFormatted = Citations.formatDateCL(d.fecha_documento);
+    const isSelected = selectedId && String(selectedId) === String(d.id_documento);
 
     return `
-      <div class="legal-card" data-id="${escapeHtml(d.id_documento)}" data-type="doctrina-admin">
+      <article class="legal-card ${isSelected ? 'is-selected' : ''}" role="listitem" data-id="${escapeHtml(d.id_documento)}" data-type="doctrina-admin">
         <div class="card-header">
           <div class="badge-cluster">
-            <span class="badge badge-corte">🏛️ ${escapeHtml(d.organismo_emisor || 'CGR / SII')}</span>
-            <span class="badge badge-tribunal">${escapeHtml(d.tipo_documento || 'Dictamen')} N° ${escapeHtml(d.numero_documento || '')}</span>
-            <span class="badge badge-recurso">Año ${escapeHtml(String(d.anio_emision || ''))}</span>
+            <span class="badge badge-corte">${escapeHtml(d.organismo_emisor || 'CGR / SII')}</span>
+            <span class="badge badge-seal">${escapeHtml(d.tipo_documento || 'Dictamen')} N° ${escapeHtml(d.numero_documento || '')}</span>
+            ${d.anio_emision ? `<span class="badge badge-recurso">Año ${escapeHtml(String(d.anio_emision))}</span>` : ''}
           </div>
-          <span class="badge-date">📅 ${dateFormatted || d.fecha_documento || ''}</span>
+          <time class="badge-date">${escapeHtml(dateFormatted || d.fecha_documento || '')}</time>
         </div>
 
         <h3 class="card-title" onclick="App.openDetail('doctrina-admin', '${escapeHtml(d.id_documento)}')">
@@ -294,7 +297,7 @@ const UI = (() => {
 
         ${d.descriptores_materias ? `
           <div class="card-descriptors">
-            <span style="color:var(--text-muted); font-size:0.75rem;">Descriptores:</span>
+            <span class="descriptor-label">Descriptores:</span>
             <span class="descriptor-tag">${escapeHtml(d.descriptores_materias)}</span>
           </div>
         ` : ''}
@@ -308,36 +311,37 @@ const UI = (() => {
             ${escapeHtml(citation)}
           </div>
           <div class="card-btn-group">
-            <button class="btn-action btn-action-gold" onclick="App.copyCitation('${escapeHtml(citation)}')">
-              📋 Copiar Cita
+            <button type="button" class="btn-action" data-citation="${escapeHtml(citation)}" onclick="App.copyCitationFromBtn(this)">
+              Copiar Cita
             </button>
-            <button class="btn-action btn-action-primary" onclick="App.openDetail('doctrina-admin', '${escapeHtml(d.id_documento)}')">
-              🔍 Ver Pronunciamiento
+            <button type="button" class="btn-action btn-action-primary" onclick="App.openDetail('doctrina-admin', '${escapeHtml(d.id_documento)}')">
+              Ver Pronunciamiento
             </button>
             ${d.url_origen ? `
               <a href="${escapeHtml(d.url_origen)}" target="_blank" rel="noopener noreferrer" class="btn-action">
-                🌐 Enlace Oficial
+                Enlace Oficial ↗
               </a>
             ` : ''}
           </div>
         </div>
-      </div>
+      </article>
     `;
   }
 
-  // Tarjeta de Doctrina Jurídica (Artículos académicos)
-  function renderDoctrinaJuridicaCard(a) {
+  // Ficha Bibliográfica: Doctrina Jurídica (Artículos académicos)
+  function renderDoctrinaJuridicaCard(a, selectedId = null) {
     const citation = Citations.generateDoctrinaJuridicaCitation(a);
+    const isSelected = selectedId && String(selectedId) === String(a.id_articulo);
 
     return `
-      <div class="legal-card" data-id="${escapeHtml(a.id_articulo)}" data-type="doctrina-juridica">
+      <article class="legal-card ${isSelected ? 'is-selected' : ''}" role="listitem" data-id="${escapeHtml(a.id_articulo)}" data-type="doctrina-juridica">
         <div class="card-header">
           <div class="badge-cluster">
-            <span class="badge badge-corte">📚 ${escapeHtml(a.area_derecho || 'Derecho General')}</span>
-            <span class="badge badge-tribunal">Año ${escapeHtml(String(a.anio_publicacion || ''))}</span>
-            ${a.citas_recibidas ? `<span class="badge badge-recurso">⭐ ${a.citas_recibidas} citas</span>` : ''}
+            <span class="badge badge-corte">${escapeHtml(a.area_derecho || 'Derecho General')}</span>
+            ${a.anio_publicacion ? `<span class="badge badge-tribunal">${escapeHtml(String(a.anio_publicacion))}</span>` : ''}
+            ${a.citas_recibidas ? `<span class="badge badge-seal">${escapeHtml(String(a.citas_recibidas))} citas</span>` : ''}
           </div>
-          <span class="badge-date">✍️ ${escapeHtml(a.autores || 'Autor')}</span>
+          <span class="badge-date">${escapeHtml(a.autores || 'Autor')}</span>
         </div>
 
         <h3 class="card-title" onclick="App.openDetail('doctrina-juridica', '${escapeHtml(a.id_articulo)}')">
@@ -346,7 +350,7 @@ const UI = (() => {
 
         ${a.revista_o_fuente ? `
           <div class="card-descriptors">
-            <span style="color:var(--text-muted); font-size:0.75rem;">Revista/Editorial:</span>
+            <span class="descriptor-label">Revista / Editorial:</span>
             <span class="descriptor-tag">${escapeHtml(a.revista_o_fuente)} ${escapeHtml(a.volumen_numero || '')}</span>
           </div>
         ` : ''}
@@ -360,32 +364,34 @@ const UI = (() => {
             ${escapeHtml(citation)}
           </div>
           <div class="card-btn-group">
-            <button class="btn-action btn-action-gold" onclick="App.copyCitation('${escapeHtml(citation)}')">
-              📋 Cita Bibliográfica
+            <button type="button" class="btn-action" data-citation="${escapeHtml(citation)}" onclick="App.copyCitationFromBtn(this)">
+              Cita Bibliográfica
             </button>
-            <button class="btn-action btn-action-primary" onclick="App.openDetail('doctrina-juridica', '${escapeHtml(a.id_articulo)}')">
-              🔍 Ver Resumen
+            <button type="button" class="btn-action btn-action-primary" onclick="App.openDetail('doctrina-juridica', '${escapeHtml(a.id_articulo)}')">
+              Ver Resumen
             </button>
             ${a.doi_o_url ? `
               <a href="${escapeHtml(a.doi_o_url)}" target="_blank" rel="noopener noreferrer" class="btn-action">
-                🔗 DOI / Web
+                DOI / Web ↗
               </a>
             ` : ''}
           </div>
         </div>
-      </div>
+      </article>
     `;
   }
 
-  // Tarjeta de Formatos Forenses y Modelos de Escritos
-  function renderFormatoCard(fmt) {
+  // Ficha Bibliográfica: Formatos Forenses y Modelos de Escritos
+  function renderFormatoCard(fmt, selectedId = null) {
+    const isSelected = selectedId && String(selectedId) === String(fmt.id_formato);
+
     return `
-      <div class="legal-card" data-id="${escapeHtml(fmt.id_formato)}" data-type="formato">
+      <article class="legal-card ${isSelected ? 'is-selected' : ''}" role="listitem" data-id="${escapeHtml(fmt.id_formato)}" data-type="formato">
         <div class="card-header">
           <div class="badge-cluster">
-            <span class="badge badge-corte">⚖️ ${escapeHtml(fmt.categoria || 'Civil')}</span>
+            <span class="badge badge-corte">${escapeHtml(fmt.categoria || 'Civil')}</span>
             ${fmt.subcategoria ? `<span class="badge badge-tribunal">${escapeHtml(fmt.subcategoria)}</span>` : ''}
-            <span class="badge badge-recurso">📝 ${escapeHtml(fmt.tipo_documento || 'Escrito')}</span>
+            <span class="badge badge-seal">${escapeHtml(fmt.tipo_documento || 'Escrito')}</span>
           </div>
           <span class="badge-date">Tribunal: ${escapeHtml(fmt.tribunal_sugerido || 'Letras')}</span>
         </div>
@@ -396,10 +402,8 @@ const UI = (() => {
 
         ${fmt.sumilla ? `
           <div class="card-descriptors">
-            <span style="color:var(--text-muted); font-size:0.75rem;">Sumilla Forense:</span>
-            <span class="descriptor-tag" style="color: var(--text-gold); font-family: var(--font-mono); font-size: 0.76rem;">
-              EN LO PRINCIPAL: ${escapeHtml(fmt.sumilla)}
-            </span>
+            <span class="descriptor-label">Sumilla:</span>
+            <span class="descriptor-tag descriptor-tag-mono">EN LO PRINCIPAL: ${escapeHtml(fmt.sumilla)}</span>
           </div>
         ` : ''}
 
@@ -408,16 +412,16 @@ const UI = (() => {
         </p>
 
         <div class="card-footer">
-          <span style="font-size: 0.78rem; color: var(--text-muted);">
+          <span class="citation-preview">
             Normas: ${escapeHtml(fmt.normativa_asociada || 'Código de Procedimiento')}
           </span>
           <div class="card-btn-group">
-            <button class="btn-action btn-action-gold" onclick="App.openDetail('formato', '${escapeHtml(fmt.id_formato)}')">
-              📝 Abrir y Editar Escrito
+            <button type="button" class="btn-action btn-action-primary" onclick="App.openDetail('formato', '${escapeHtml(fmt.id_formato)}')">
+              Abrir y Editar Escrito
             </button>
           </div>
         </div>
-      </div>
+      </article>
     `;
   }
 

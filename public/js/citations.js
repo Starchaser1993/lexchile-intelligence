@@ -4,15 +4,46 @@ const Citations = (() => {
   function formatDateCL(dateStr) {
     if (!dateStr) return '';
     try {
-      const parts = dateStr.split('-');
+      const clean = String(dateStr).split('T')[0];
+      const parts = clean.split('-');
       if (parts.length === 3) {
-        const d = new Date(parts[0], parts[1] - 1, parts[2]);
+        const d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
         return d.toLocaleDateString('es-CL', { day: 'numeric', month: 'long', year: 'numeric' });
       }
       return dateStr;
     } catch {
       return dateStr;
     }
+  }
+
+  function formatDateShortCL(dateStr) {
+    if (!dateStr) return '';
+    try {
+      const clean = String(dateStr).split('T')[0];
+      const parts = clean.split('-');
+      if (parts.length === 3) {
+        return `${parts[2]}/${parts[1]}/${parts[0]}`;
+      }
+      return dateStr;
+    } catch {
+      return dateStr;
+    }
+  }
+
+  function abbreviateCourt(name) {
+    if (!name) return 'PJUD';
+    const n = String(name).trim();
+    if (/corte suprema/i.test(n)) return 'CS';
+    if (/corte de apelaciones de /i.test(n)) {
+      return 'ICA ' + n.replace(/corte de apelaciones de /i, '').trim();
+    }
+    if (/^c\.a\. de /i.test(n)) {
+      return 'ICA ' + n.replace(/^c\.a\. de /i, '').trim();
+    }
+    if (/constitucional/i.test(n)) return 'TC';
+    if (/libre competencia/i.test(n)) return 'TDLC';
+    if (/ambiental/i.test(n)) return 'TA';
+    return n;
   }
 
   function generateFalloCitation(f) {
@@ -72,6 +103,92 @@ const Citations = (() => {
     return `${autores}${anio}${titulo}${fuente}${vol}.`;
   }
 
+  // Formateador multi-estilo para el Drawer de Lectura (Forense, Académica, Abreviada)
+  function formatCitationByStyle(type, data, style = 'forense') {
+    if (!data) return '';
+
+    if (type === 'fallo') {
+      if (style === 'abreviada') {
+        const c = abbreviateCourt(data.corte || data.tribunal);
+        const rol = data.rol_numero ? `Rol ${data.rol_numero}` : 'S/R';
+        const fecha = formatDateShortCL(data.fecha_sentencia);
+        return `${c}, ${rol}${fecha ? `, ${fecha}` : ''}${data.resultado_recurso ? ` (${data.resultado_recurso})` : ''}.`;
+      }
+      if (style === 'academica') {
+        const corte = data.corte || 'Poder Judicial de Chile';
+        const fecha = formatDateCL(data.fecha_sentencia);
+        const rol = data.rol_numero ? `Rol N° ${data.rol_numero}` : '';
+        const carat = data.caratulado ? `, "${data.caratulado}"` : '';
+        return `${corte}${data.sala ? ` (${data.sala})` : ''}, sentencia de ${fecha || 'fecha s/i'}, ${rol}${carat}.`;
+      }
+      return generateFalloCitation(data);
+    }
+
+    if (type === 'causa') {
+      if (style === 'abreviada') {
+        return `${data.tribunal || 'Tribunal'}, RIT ${data.rit || 'S/R'}${data.ruc ? ` / RUC ${data.ruc}` : ''}.`;
+      }
+      if (style === 'academica') {
+        const fecha = formatDateCL(data.fecha_ingreso);
+        return `${data.tribunal || 'Tribunal de Justicia'}, causa "${data.caratulado || 'S/C'}", RIT ${data.rit || 'S/R'}${fecha ? `, ingresada el ${fecha}` : ''}.`;
+      }
+      return generateCausaCitation(data);
+    }
+
+    if (type === 'especial') {
+      if (style === 'abreviada') {
+        const c = abbreviateCourt(data.tribunal);
+        const fecha = formatDateShortCL(data.fecha_dictacion);
+        return `${c}, Rol ${data.rol_causa || 'S/R'}${fecha ? `, ${fecha}` : ''}.`;
+      }
+      if (style === 'academica') {
+        const fecha = formatDateCL(data.fecha_dictacion);
+        return `${data.tribunal || 'Tribunal Especial'}, sentencia de ${fecha || 'fecha s/i'}, Rol N° ${data.rol_causa || 'S/R'}, "${data.caratulado_titulo || ''}".`;
+      }
+      return generateEspecialCitation(data);
+    }
+
+    if (type === 'ley') {
+      if (style === 'abreviada') {
+        return `${data.tipo_norma || 'Norma'} N° ${data.numero_norma || 'S/N'} (DO ${formatDateShortCL(data.fecha_publicacion) || 's/f'}).`;
+      }
+      if (style === 'academica') {
+        return `Chile, ${data.organismo_emisor || 'Congreso Nacional'}, ${data.tipo_norma || 'Ley'} N° ${data.numero_norma || 'S/N'}, "${data.titulo_norma || data.denominacion_oficial || ''}", Diario Oficial, ${formatDateCL(data.fecha_publicacion) || 's/f'}.`;
+      }
+      return generateLeyCitation(data);
+    }
+
+    if (type === 'doctrina-admin') {
+      if (style === 'abreviada') {
+        const org = /contralor/i.test(data.organismo_emisor || '') ? 'CGR' : (/impuestos/i.test(data.organismo_emisor || '') ? 'SII' : (data.organismo_emisor || 'Org.'));
+        return `${org}, ${data.tipo_documento || 'Dictamen'} N° ${data.numero_documento || 'S/N'}, ${formatDateShortCL(data.fecha_documento) || data.anio_emision || ''}.`;
+      }
+      if (style === 'academica') {
+        return `${data.organismo_emisor || 'Organismo'}, ${data.tipo_documento || 'Dictamen'} N° ${data.numero_documento || 'S/N'} (${formatDateCL(data.fecha_documento) || data.anio_emision || ''}), "${data.materia_resumen || ''}".`;
+      }
+      return generateDoctrinaAdminCitation(data);
+    }
+
+    if (type === 'doctrina-juridica') {
+      if (style === 'abreviada') {
+        return `${data.autores || 'Autor'} (${data.anio_publicacion || 's/f'}), «${data.titulo || ''}».`;
+      }
+      if (style === 'academica') {
+        return `${data.autores || 'Autor'}, "${data.titulo || ''}", en ${data.revista_o_fuente || 'Revista Jurídica'}${data.volumen_numero ? `, ${data.volumen_numero}` : ''} (${data.anio_publicacion || 's/f'}).`;
+      }
+      return generateDoctrinaJuridicaCitation(data);
+    }
+
+    if (type === 'formato') {
+      if (style === 'abreviada') {
+        return `Formato Forense: ${data.titulo || 'Escrito'} (${data.categoria || 'General'}).`;
+      }
+      return `Escrito forense: «${data.titulo || 'Modelo de Escrito'}». Normativa asociada: ${data.normativa_asociada || 'Reglas procesales vigentes'}.`;
+    }
+
+    return '';
+  }
+
   async function copyToClipboard(text) {
     if (navigator.clipboard && window.isSecureContext) {
       await navigator.clipboard.writeText(text);
@@ -103,12 +220,14 @@ const Citations = (() => {
 
   return {
     formatDateCL,
+    formatDateShortCL,
     generateFalloCitation,
     generateCausaCitation,
     generateEspecialCitation,
     generateLeyCitation,
     generateDoctrinaAdminCitation,
     generateDoctrinaJuridicaCitation,
+    formatCitationByStyle,
     copyToClipboard,
     downloadTextFile
   };

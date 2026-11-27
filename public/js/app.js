@@ -1,4 +1,4 @@
-// Orquestador Principal de LexChile Intelligence
+// Orquestador Principal de LexChile Intelligence — Archivo Judicial Split-View
 const App = (() => {
 
   const state = {
@@ -9,7 +9,12 @@ const App = (() => {
     limit: 15,
     total: 0,
     totalPages: 1,
-    loading: false
+    loading: false,
+    activeDocId: null,
+    activeDocType: null,
+    activeDocData: null,
+    citationStyle: 'forense',
+    readingFontSize: 0.98
   };
 
   // Inicialización
@@ -79,7 +84,7 @@ const App = (() => {
     if (tab === 'fallos') {
       html = `
         <div class="filter-group">
-          <label class="filter-label">Corte / Tribunal</label>
+          <label class="filter-label" for="filterCorte">Corte / Tribunal</label>
           <select id="filterCorte" class="filter-select" onchange="App.onFilterChange()">
             <option value="">Todas las Cortes</option>
             <option value="Corte Suprema">Corte Suprema</option>
@@ -94,7 +99,7 @@ const App = (() => {
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Sala</label>
+          <label class="filter-label" for="filterSala">Sala</label>
           <select id="filterSala" class="filter-select" onchange="App.onFilterChange()">
             <option value="">Todas las Salas</option>
             <option value="1ª Sala">Primera Sala (Civil)</option>
@@ -105,7 +110,7 @@ const App = (() => {
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Tipo de Recurso</label>
+          <label class="filter-label" for="filterRecurso">Tipo de Recurso</label>
           <select id="filterRecurso" class="filter-select" onchange="App.onFilterChange()">
             <option value="">Todos los Recursos</option>
             <option value="Casación Fondo">Casación en el Fondo</option>
@@ -118,12 +123,12 @@ const App = (() => {
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Materia Jurídica</label>
+          <label class="filter-label" for="filterMateria">Materia Jurídica</label>
           <input type="text" id="filterMateria" class="filter-input" placeholder="Ej. Indemnización, Despido..." onchange="App.onFilterChange()" />
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Resultado del Recurso</label>
+          <label class="filter-label" for="filterResultado">Resultado del Recurso</label>
           <select id="filterResultado" class="filter-select" onchange="App.onFilterChange()">
             <option value="">Cualquier Resultado</option>
             <option value="Acoge">Acogido</option>
@@ -133,19 +138,19 @@ const App = (() => {
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Fecha Desde</label>
+          <label class="filter-label" for="filterFechaDesde">Fecha Desde</label>
           <input type="date" id="filterFechaDesde" class="filter-input" onchange="App.onFilterChange()" />
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Fecha Hasta</label>
+          <label class="filter-label" for="filterFechaHasta">Fecha Hasta</label>
           <input type="date" id="filterFechaHasta" class="filter-input" onchange="App.onFilterChange()" />
         </div>
       `;
     } else if (tab === 'causas') {
       html = `
         <div class="filter-group">
-          <label class="filter-label">Competencia</label>
+          <label class="filter-label" for="filterCompetencia">Competencia</label>
           <select id="filterCompetencia" class="filter-select" onchange="App.onFilterChange()">
             <option value="">Todas las Competencias</option>
             <option value="Civil">Civil</option>
@@ -156,34 +161,34 @@ const App = (() => {
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">RIT Específico</label>
+          <label class="filter-label" for="filterRit">RIT Específico</label>
           <input type="text" id="filterRit" class="filter-input" placeholder="Ej. C-1234-2026" onchange="App.onFilterChange()" />
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">RUC Específico</label>
+          <label class="filter-label" for="filterRuc">RUC Específico</label>
           <input type="text" id="filterRuc" class="filter-input" placeholder="Ej. 2600..." onchange="App.onFilterChange()" />
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Tribunal</label>
+          <label class="filter-label" for="filterTribunal">Tribunal</label>
           <input type="text" id="filterTribunal" class="filter-input" placeholder="Ej. 1º Juzgado Civil..." onchange="App.onFilterChange()" />
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Parte Procesal</label>
+          <label class="filter-label" for="filterParte">Parte Procesal</label>
           <input type="text" id="filterParte" class="filter-input" placeholder="Nombre demandante o demandado..." onchange="App.onFilterChange()" />
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Procedimiento</label>
+          <label class="filter-label" for="filterProcedimiento">Procedimiento</label>
           <input type="text" id="filterProcedimiento" class="filter-input" placeholder="Ej. Ejecutivo, Ordinario..." onchange="App.onFilterChange()" />
         </div>
       `;
     } else if (tab === 'especiales') {
       html = `
         <div class="filter-group">
-          <label class="filter-label">Tribunal Especial</label>
+          <label class="filter-label" for="filterTribunalEspecial">Tribunal Especial</label>
           <select id="filterTribunalEspecial" class="filter-select" onchange="App.onFilterChange()">
             <option value="">Todos los Tribunales Especiales</option>
             <option value="Constitucional">Tribunal Constitucional (TC)</option>
@@ -193,14 +198,14 @@ const App = (() => {
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Tipo Procedimiento</label>
+          <label class="filter-label" for="filterProcEspecial">Tipo Procedimiento</label>
           <input type="text" id="filterProcEspecial" class="filter-input" placeholder="Ej. Inaplicabilidad, Requerimiento..." onchange="App.onFilterChange()" />
         </div>
       `;
     } else if (tab === 'leyes') {
       html = `
         <div class="filter-group">
-          <label class="filter-label">Tipo de Norma</label>
+          <label class="filter-label" for="filterTipoNorma">Tipo de Norma</label>
           <select id="filterTipoNorma" class="filter-select" onchange="App.onFilterChange()">
             <option value="">Todos los tipos</option>
             <option value="Código">Códigos de la República</option>
@@ -212,19 +217,19 @@ const App = (() => {
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Número de Norma</label>
+          <label class="filter-label" for="filterNumeroNorma">Número de Norma</label>
           <input type="text" id="filterNumeroNorma" class="filter-input" placeholder="Ej. 19880, 21394..." onchange="App.onFilterChange()" />
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Organismo Emisor</label>
+          <label class="filter-label" for="filterOrganismo">Organismo Emisor</label>
           <input type="text" id="filterOrganismo" class="filter-input" placeholder="Ej. Ministerio de Justicia..." onchange="App.onFilterChange()" />
         </div>
       `;
     } else if (tab === 'doctrina-admin') {
       html = `
         <div class="filter-group">
-          <label class="filter-label">Organismo Emisor</label>
+          <label class="filter-label" for="filterOrgAdmin">Organismo Emisor</label>
           <select id="filterOrgAdmin" class="filter-select" onchange="App.onFilterChange()">
             <option value="">Todos los Organismos</option>
             <option value="Contraloría">Contraloría General (CGR)</option>
@@ -233,19 +238,19 @@ const App = (() => {
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Año de Emisión</label>
+          <label class="filter-label" for="filterAnioAdmin">Año de Emisión</label>
           <input type="number" id="filterAnioAdmin" class="filter-input" placeholder="Ej. 2024, 2025..." min="1990" max="2026" onchange="App.onFilterChange()" />
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Número de Dictamen / Oficio</label>
+          <label class="filter-label" for="filterNumAdmin">Número de Dictamen / Oficio</label>
           <input type="text" id="filterNumAdmin" class="filter-input" placeholder="Ej. E123456..." onchange="App.onFilterChange()" />
         </div>
       `;
     } else if (tab === 'doctrina-juridica') {
       html = `
         <div class="filter-group">
-          <label class="filter-label">Área del Derecho</label>
+          <label class="filter-label" for="filterAreaDerecho">Área del Derecho</label>
           <select id="filterAreaDerecho" class="filter-select" onchange="App.onFilterChange()">
             <option value="">Todas las Áreas</option>
             <option value="Civil">Derecho Civil</option>
@@ -259,19 +264,19 @@ const App = (() => {
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Autor</label>
+          <label class="filter-label" for="filterAutor">Autor</label>
           <input type="text" id="filterAutor" class="filter-input" placeholder="Nombre del autor o académica..." onchange="App.onFilterChange()" />
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Año</label>
+          <label class="filter-label" for="filterAnioDoc">Año</label>
           <input type="number" id="filterAnioDoc" class="filter-input" placeholder="Ej. 2023, 2024..." min="1990" max="2026" onchange="App.onFilterChange()" />
         </div>
       `;
     } else if (tab === 'formatos') {
       html = `
         <div class="filter-group">
-          <label class="filter-label">Categoría Forense</label>
+          <label class="filter-label" for="filterCategoriaFmt">Categoría Forense</label>
           <select id="filterCategoriaFmt" class="filter-select" onchange="App.onFilterChange()">
             <option value="">Todas las Categorías</option>
             <option value="Civil">Civil</option>
@@ -285,7 +290,7 @@ const App = (() => {
         </div>
 
         <div class="filter-group">
-          <label class="filter-label">Tipo de Escrito</label>
+          <label class="filter-label" for="filterTipoDocFmt">Tipo de Escrito</label>
           <select id="filterTipoDocFmt" class="filter-select" onchange="App.onFilterChange()">
             <option value="">Todos los Tipos</option>
             <option value="Demanda">Demanda / Querella</option>
@@ -431,12 +436,11 @@ const App = (() => {
         }
 
         if (cacheIndicator) {
+          cacheIndicator.style.display = 'inline-flex';
           if (res.cached || res.fromClientCache) {
-            cacheIndicator.style.display = 'inline-flex';
-            cacheIndicator.textContent = `⚡ Caché ultrarrápido (${elapsedMs} ms)`;
+            cacheIndicator.textContent = `Caché · ${elapsedMs} ms`;
           } else {
-            cacheIndicator.style.display = 'inline-flex';
-            cacheIndicator.textContent = `☁️ BigQuery (${elapsedMs} ms)`;
+            cacheIndicator.textContent = `BigQuery · ${elapsedMs} ms`;
           }
         }
 
@@ -444,9 +448,9 @@ const App = (() => {
         renderPagination();
       } else {
         listContainer.innerHTML = `
-          <div style="text-align: center; padding: 50px 20px; color: var(--text-muted);">
+          <div class="empty-state-box">
             <h3>No se encontraron registros</h3>
-            <p style="font-size: 0.9rem; margin-top: 6px;">Prueba ajustando los términos de búsqueda o eliminando filtros.</p>
+            <p>Ajusta los términos de búsqueda o restablece los filtros del archivo.</p>
           </div>
         `;
         renderPagination();
@@ -454,9 +458,9 @@ const App = (() => {
     } catch (err) {
       console.error('Error al ejecutar búsqueda:', err);
       listContainer.innerHTML = `
-        <div style="text-align: center; padding: 40px 20px; color: var(--rose-danger);">
-          <h3>Error al conectar con el Data Lake</h3>
-          <p style="font-size: 0.85rem; margin-top: 6px;">${UI.escapeHtml(err.message)}</p>
+        <div class="empty-state-box error-state-box">
+          <h3>Error al consultar el Archivo Judicial</h3>
+          <p>${UI.escapeHtml(err.message)}</p>
         </div>
       `;
     } finally {
@@ -464,15 +468,14 @@ const App = (() => {
     }
   }
 
-  // Renderizar Tarjetas de Resultados según el Tab
+  // Renderizar Lista Documental según el Tab
   function renderResults(items) {
     const listContainer = document.getElementById('resultsList');
     if (!items || items.length === 0) {
       listContainer.innerHTML = `
-        <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
-          <div style="font-size: 2.5rem; margin-bottom: 12px;">⚖️</div>
+        <div class="empty-state-box">
           <h3>Sin resultados para esta consulta</h3>
-          <p style="font-size: 0.88rem; margin-top: 6px;">Intenta con palabras clave más amplias, rol de causa o materias afines.</p>
+          <p>Intenta con palabras clave más amplias, número de rol o materias jurídicas afines.</p>
         </div>
       `;
       return;
@@ -482,30 +485,43 @@ const App = (() => {
     for (const item of items) {
       switch (state.currentTab) {
         case 'fallos':
-          html += UI.renderFalloCard(item);
+          html += UI.renderFalloCard(item, state.activeDocId);
           break;
         case 'causas':
-          html += UI.renderCausaCard(item);
+          html += UI.renderCausaCard(item, state.activeDocId);
           break;
         case 'especiales':
-          html += UI.renderEspecialCard(item);
+          html += UI.renderEspecialCard(item, state.activeDocId);
           break;
         case 'leyes':
-          html += UI.renderLeyCard(item);
+          html += UI.renderLeyCard(item, state.activeDocId);
           break;
         case 'doctrina-admin':
-          html += UI.renderDoctrinaAdminCard(item);
+          html += UI.renderDoctrinaAdminCard(item, state.activeDocId);
           break;
         case 'doctrina-juridica':
-          html += UI.renderDoctrinaJuridicaCard(item);
+          html += UI.renderDoctrinaJuridicaCard(item, state.activeDocId);
           break;
         case 'formatos':
-          html += UI.renderFormatoCard(item);
+          html += UI.renderFormatoCard(item, state.activeDocId);
           break;
       }
     }
 
     listContainer.innerHTML = html;
+  }
+
+  // Sincronizar marca de ficha seleccionada en la lista central
+  function syncSelectedCardUI(id) {
+    document.querySelectorAll('.legal-card.is-selected').forEach(el => {
+      el.classList.remove('is-selected');
+    });
+    if (id !== null && id !== undefined) {
+      const target = document.querySelector(`.legal-card[data-id="${CSS.escape(String(id))}"]`);
+      if (target) {
+        target.classList.add('is-selected');
+      }
+    }
   }
 
   // Paginación
@@ -521,19 +537,17 @@ const App = (() => {
     const cur = state.page;
     const max = state.totalPages;
 
-    let html = `
-      <button class="btn-page" ${cur <= 1 ? 'disabled' : ''} onclick="App.goToPage(${cur - 1})">
+    container.innerHTML = `
+      <button type="button" class="btn-page" ${cur <= 1 ? 'disabled' : ''} onclick="App.goToPage(${cur - 1})">
         ← Anterior
       </button>
-      <span style="font-size:0.85rem; color:var(--text-muted); padding: 0 10px;">
+      <span class="pagination-status">
         Página <strong>${cur}</strong> de <strong>${max.toLocaleString('es-CL')}</strong>
       </span>
-      <button class="btn-page" ${cur >= max ? 'disabled' : ''} onclick="App.goToPage(${cur + 1})">
+      <button type="button" class="btn-page" ${cur >= max ? 'disabled' : ''} onclick="App.goToPage(${cur + 1})">
         Siguiente →
       </button>
     `;
-
-    container.innerHTML = html;
   }
 
   function goToPage(p) {
@@ -559,72 +573,358 @@ const App = (() => {
     UI.showToast('Filtros restablecidos');
   }
 
-  // Copiar Cita Canónica
+  function toggleMobileFilters() {
+    const sidebar = document.getElementById('filtersSidebar');
+    if (sidebar) {
+      sidebar.classList.toggle('mobile-open');
+    }
+  }
+
+  // Copiar Cita Formateada
   async function copyCitation(citationText) {
     const ok = await Citations.copyToClipboard(citationText);
     if (ok) {
-      UI.showToast('Cita canónica copiada al portapapeles');
+      UI.showToast('Cita formateada copiada al portapapeles');
     } else {
       UI.showToast('No se pudo copiar automáticamente');
     }
   }
 
-  // Visor Forense / Modal de Detalle
+  function copyCitationFromBtn(btn) {
+    const cit = btn?.dataset?.citation || '';
+    if (cit) copyCitation(cit);
+  }
+
+  function copyCurrentCitation() {
+    const citElem = document.getElementById('modalCitationString');
+    if (citElem && citElem.textContent.trim()) {
+      copyCitation(citElem.textContent.trim());
+    }
+  }
+
+  function setCitationStyle(style) {
+    state.citationStyle = style;
+    document.querySelectorAll('.btn-cit-style').forEach(btn => {
+      btn.classList.toggle('active', btn.dataset.style === style);
+    });
+
+    if (state.activeDocType && state.activeDocData) {
+      const citBox = document.getElementById('modalCitationString');
+      if (citBox) {
+        citBox.textContent = Citations.formatCitationByStyle(state.activeDocType, state.activeDocData, style);
+      }
+    }
+  }
+
+  // Control de ancho del Panel Derecho (Split-View) y tamaño de letra
+  function toggleDrawerWidth() {
+    document.body.classList.toggle('drawer-expanded');
+  }
+
+  function adjustReadingFont(delta) {
+    state.readingFontSize = Math.min(1.24, Math.max(0.84, +(state.readingFontSize + delta * 0.06).toFixed(2)));
+    const area = document.querySelector('#modalBody .document-reading-area');
+    if (area) {
+      area.style.setProperty('--reading-font-size', `${state.readingFontSize}rem`);
+    }
+  }
+
+  // =========================================================================
+  // Herramientas de Subrayado Forense dentro del Drawer
+  // =========================================================================
+
+  function applyHighlight(color = 'ochre') {
+    const readingArea = document.querySelector('#modalBody .document-reading-area');
+    if (!readingArea) {
+      UI.showToast('Este documento no tiene cuerpo de lectura subrayable');
+      return;
+    }
+
+    const selection = window.getSelection();
+    if (!selection || selection.isCollapsed || selection.rangeCount === 0) {
+      UI.showToast('Selecciona primero un pasaje del texto para subrayarlo');
+      return;
+    }
+
+    const range = selection.getRangeAt(0);
+    if (!readingArea.contains(range.commonAncestorContainer)) {
+      UI.showToast('La selección debe estar dentro del texto del fallo');
+      return;
+    }
+
+    const selectedText = range.toString().trim();
+    if (!selectedText) return;
+
+    // Recolectar los nodos de texto cubiertos por la selección para envolver de forma segura
+    const textNodes = [];
+    const walker = document.createTreeWalker(
+      range.commonAncestorContainer.nodeType === Node.TEXT_NODE
+        ? range.commonAncestorContainer.parentNode
+        : range.commonAncestorContainer,
+      NodeFilter.SHOW_TEXT,
+      {
+        acceptNode(node) {
+          if (!node.nodeValue || !node.nodeValue.length) return NodeFilter.FILTER_REJECT;
+          if (!readingArea.contains(node)) return NodeFilter.FILTER_REJECT;
+          if (range.intersectsNode(node)) return NodeFilter.FILTER_ACCEPT;
+          return NodeFilter.FILTER_REJECT;
+        }
+      }
+    );
+
+    let current = walker.nextNode();
+    while (current) {
+      textNodes.push(current);
+      current = walker.nextNode();
+    }
+
+    if (textNodes.length === 0) return;
+
+    const groupId = `hl-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`;
+    const colorClass = `hl-${color}`;
+
+    textNodes.forEach(node => {
+      const start = node === range.startContainer ? range.startOffset : 0;
+      const end = node === range.endContainer ? range.endOffset : node.nodeValue.length;
+      if (start >= end) return;
+
+      const subRange = document.createRange();
+      subRange.setStart(node, start);
+      subRange.setEnd(node, end);
+
+      const mark = document.createElement('mark');
+      mark.className = `legal-highlight ${colorClass}`;
+      mark.dataset.hlGroup = groupId;
+      mark.title = 'Clic para quitar subrayado';
+      mark.addEventListener('click', () => removeHighlightGroup(groupId));
+
+      try {
+        subRange.surroundContents(mark);
+      } catch (e) {
+        const frag = subRange.extractContents();
+        mark.appendChild(frag);
+        subRange.insertNode(mark);
+      }
+    });
+
+    selection.removeAllRanges();
+    refreshHighlightsUI();
+    UI.showToast('Pasaje subrayado');
+  }
+
+  function removeHighlightGroup(groupId) {
+    const readingArea = document.querySelector('#modalBody .document-reading-area');
+    if (!readingArea) return;
+
+    const marks = readingArea.querySelectorAll(`mark[data-hl-group="${CSS.escape(groupId)}"]`);
+    marks.forEach(mark => {
+      const parent = mark.parentNode;
+      while (mark.firstChild) {
+        parent.insertBefore(mark.firstChild, mark);
+      }
+      parent.removeChild(mark);
+      parent.normalize();
+    });
+
+    refreshHighlightsUI();
+  }
+
+  function clearHighlights() {
+    const readingArea = document.querySelector('#modalBody .document-reading-area');
+    if (!readingArea) return;
+
+    const marks = readingArea.querySelectorAll('mark.legal-highlight');
+    marks.forEach(mark => {
+      const parent = mark.parentNode;
+      while (mark.firstChild) {
+        parent.insertBefore(mark.firstChild, mark);
+      }
+      parent.removeChild(mark);
+      parent.normalize();
+    });
+
+    refreshHighlightsUI();
+    UI.showToast('Subrayados eliminados');
+  }
+
+  function collectHighlightedTexts() {
+    const readingArea = document.querySelector('#modalBody .document-reading-area');
+    if (!readingArea) return [];
+
+    const groups = new Map();
+    readingArea.querySelectorAll('mark.legal-highlight').forEach(mark => {
+      const gid = mark.dataset.hlGroup || 'single';
+      const prev = groups.get(gid) || '';
+      groups.set(gid, prev + mark.textContent);
+    });
+
+    return Array.from(groups.values())
+      .map(t => t.replace(/\s+/g, ' ').trim())
+      .filter(Boolean);
+  }
+
+  function refreshHighlightsUI() {
+    const excerpts = collectHighlightedTexts();
+    const countBadge = document.getElementById('highlightCountBadge');
+    const btnCopy = document.getElementById('btnCopyHighlights');
+    const btnClear = document.getElementById('btnClearHighlights');
+    const summaryBox = document.getElementById('highlightsSummaryBox');
+    const summaryList = document.getElementById('highlightsSummaryList');
+
+    const hasItems = excerpts.length > 0;
+    if (countBadge) {
+      countBadge.style.display = hasItems ? 'inline-flex' : 'none';
+      countBadge.textContent = String(excerpts.length);
+    }
+    if (btnCopy) btnCopy.style.display = hasItems ? 'inline-flex' : 'none';
+    if (btnClear) btnClear.style.display = hasItems ? 'inline-flex' : 'none';
+
+    if (summaryBox && summaryList) {
+      summaryBox.classList.toggle('has-items', hasItems);
+      summaryList.innerHTML = excerpts
+        .map(txt => `<li>«${UI.escapeHtml(txt)}»</li>`)
+        .join('');
+    }
+  }
+
+  async function copyHighlightedExcerpts() {
+    const excerpts = collectHighlightedTexts();
+    if (excerpts.length === 0) {
+      UI.showToast('No hay pasajes subrayados para copiar');
+      return;
+    }
+
+    const cit = document.getElementById('modalCitationString')?.textContent?.trim() || '';
+    const formatted = excerpts.map(t => `«${t}»`).join('\n\n') + (cit ? `\n\n(${cit})` : '');
+    const ok = await Citations.copyToClipboard(formatted);
+    if (ok) {
+      UI.showToast(`${excerpts.length} extracto(s) y cita copiados para escrito`);
+    }
+  }
+
+  // =========================================================================
+  // Panel Lateral Derecho (Split-View Drawer de Detalle)
+  // =========================================================================
+
   async function openDetail(type, id) {
-    const modal = document.getElementById('documentModal');
+    const drawer = document.getElementById('documentModal');
+    const kickerElem = document.getElementById('modalKicker');
     const titleElem = document.getElementById('modalTitle');
     const metaElem = document.getElementById('modalMeta');
     const citationString = document.getElementById('modalCitationString');
+    const toolbarElem = document.getElementById('readingToolbar');
     const bodyElem = document.getElementById('modalBody');
     const footerElem = document.getElementById('modalFooter');
 
+    state.activeDocId = id;
+    state.activeDocType = type;
+    state.activeDocData = null;
+
+    syncSelectedCardUI(id);
+
+    const kickerMap = {
+      'fallo': 'Jurisprudencia Judicial · PJUD',
+      'causa': 'Expediente Judicial · 2026',
+      'especial': 'Jurisdicción Especial',
+      'ley': 'Legislación Vigente · BCN',
+      'doctrina-admin': 'Doctrina Administrativa · CGR / SII',
+      'doctrina-juridica': 'Doctrina Académica',
+      'formato': 'Formato Procesal Editable'
+    };
+
+    if (kickerElem) kickerElem.textContent = kickerMap[type] || 'Ficha del Archivo Judicial';
     titleElem.textContent = 'Cargando documento judicial...';
     metaElem.textContent = '';
-    citationString.textContent = 'Generando cita canónica...';
-    bodyElem.innerHTML = '<div class="skeleton-line full" style="height:100px;"></div>';
+    citationString.textContent = 'Generando cita formateada...';
+    if (toolbarElem) toolbarElem.style.display = type === 'formato' ? 'none' : 'flex';
 
-    modal.classList.add('open');
+    bodyElem.innerHTML = `
+      <div class="skeleton-card" style="padding: 8px 0; border: none;">
+        <div class="skeleton-line short"></div>
+        <div class="skeleton-line medium"></div>
+        <div class="skeleton-line full"></div>
+        <div class="skeleton-line full"></div>
+      </div>
+    `;
+    footerElem.innerHTML = '';
+
+    drawer.classList.add('open');
+    document.body.classList.add('drawer-open');
+    refreshHighlightsUI();
 
     try {
       let data;
       if (type === 'fallo') {
         const res = await API.getFalloById(id);
         data = res.data;
+        state.activeDocData = data;
         renderFalloDetail(data, titleElem, metaElem, citationString, bodyElem, footerElem);
       } else if (type === 'causa') {
         const res = await API.getCausaById(id);
         data = res.data;
+        state.activeDocData = data;
         renderCausaDetail(data, titleElem, metaElem, citationString, bodyElem, footerElem);
       } else if (type === 'especial') {
         const res = await API.getEspecialById(id);
         data = res.data;
+        state.activeDocData = data;
         renderEspecialDetail(data, titleElem, metaElem, citationString, bodyElem, footerElem);
       } else if (type === 'ley') {
         const res = await API.getLeyById(id);
         data = res.data;
+        state.activeDocData = data;
         renderLeyDetail(data, titleElem, metaElem, citationString, bodyElem, footerElem);
       } else if (type === 'doctrina-admin') {
         const res = await API.getDoctrinaAdminById(id);
         data = res.data;
+        state.activeDocData = data;
         renderDoctrinaAdminDetail(data, titleElem, metaElem, citationString, bodyElem, footerElem);
       } else if (type === 'doctrina-juridica') {
         const res = await API.getDoctrinaJuridicaById(id);
         data = res.data;
+        state.activeDocData = data;
         renderDoctrinaJuridicaDetail(data, titleElem, metaElem, citationString, bodyElem, footerElem);
       } else if (type === 'formato') {
         const res = await API.getFormatoById(id);
         data = res.data;
+        state.activeDocData = data;
         renderFormatoDetail(data, titleElem, metaElem, citationString, bodyElem, footerElem);
       }
+
+      // Aplicar tamaño de fuente de lectura preferido y reiniciar panel de subrayados
+      const readingArea = bodyElem.querySelector('.document-reading-area');
+      if (readingArea) {
+        readingArea.style.setProperty('--reading-font-size', `${state.readingFontSize}rem`);
+      }
+      refreshHighlightsUI();
     } catch (err) {
-      bodyElem.innerHTML = `<p style="color:var(--rose-danger);">Error al cargar detalle: ${err.message}</p>`;
+      bodyElem.innerHTML = `
+        <div class="empty-state-box error-state-box">
+          <h3>Error al cargar el documento</h3>
+          <p>${UI.escapeHtml(err.message)}</p>
+        </div>
+      `;
     }
   }
 
+  function renderHighlightsSummaryMarkup() {
+    return `
+      <div id="highlightsSummaryBox" class="highlights-summary-box">
+        <div class="highlights-summary-header">
+          <span class="highlights-summary-title">Extractos Subrayados para Escrito</span>
+          <button type="button" class="btn-action btn-action-primary" onclick="App.copyHighlightedExcerpts()">
+            Copiar extractos + cita
+          </button>
+        </div>
+        <ul id="highlightsSummaryList" class="highlights-list"></ul>
+      </div>
+    `;
+  }
+
   function renderFalloDetail(f, title, meta, citBox, body, footer) {
-    const cit = Citations.generateFalloCitation(f);
+    const cit = Citations.formatCitationByStyle('fallo', f, state.citationStyle);
     title.textContent = f.caratulado || 'Sentencia Judicial';
-    meta.textContent = `${f.corte || ''} • ${f.sala || ''} • Rol ${f.rol_numero || 'S/R'}`;
+    meta.textContent = `${f.corte || ''} · ${f.sala || 'Pleno'} · Rol ${f.rol_numero || 'S/R'}`;
     citBox.textContent = cit;
 
     body.innerHTML = `
@@ -635,18 +935,18 @@ const App = (() => {
         </div>
         <div class="metadata-item">
           <span class="metadata-item-label">Rol del Recurso</span>
-          <span class="metadata-item-val" style="color:var(--gold-primary); font-family:var(--font-mono);">${UI.escapeHtml(f.rol_numero || 'S/N')}</span>
+          <span class="metadata-item-val val-mono">${UI.escapeHtml(f.rol_numero || 'S/N')}</span>
         </div>
         <div class="metadata-item">
           <span class="metadata-item-label">Fecha Dictación</span>
-          <span class="metadata-item-val">${Citations.formatDateCL(f.fecha_sentencia)}</span>
+          <span class="metadata-item-val">${UI.escapeHtml(Citations.formatDateCL(f.fecha_sentencia))}</span>
         </div>
         <div class="metadata-item">
           <span class="metadata-item-label">Tipo Recurso</span>
           <span class="metadata-item-val">${UI.escapeHtml(f.tipo_recurso || 'Ordinario')}</span>
         </div>
         <div class="metadata-item">
-          <span class="metadata-item-label">Resultado Recurso</span>
+          <span class="metadata-item-label">Resultado</span>
           <span class="metadata-item-val">${UI.escapeHtml(f.resultado_recurso || 'Fallado')}</span>
         </div>
         <div class="metadata-item">
@@ -656,47 +956,50 @@ const App = (() => {
       </div>
 
       ${f.descriptores_juridicos ? `
-        <div style="background:rgba(255,255,255,0.02); padding:14px; border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
-          <strong style="font-size:0.75rem; text-transform:uppercase; color:var(--gold-primary);">Descriptores de Doctrina Judicial:</strong>
-          <p style="font-size:0.9rem; margin-top:4px;">${UI.escapeHtml(f.descriptores_juridicos)}</p>
+        <div class="editorial-callout">
+          <span class="editorial-callout-label">Descriptores de Doctrina Judicial</span>
+          <p>${UI.escapeHtml(f.descriptores_juridicos)}</p>
         </div>
       ` : ''}
 
       <div>
-        <h4 style="font-size:0.85rem; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px;">Texto y Considerandos de la Sentencia:</h4>
-        <div class="document-reading-area">
-          ${UI.escapeHtml(f.texto_sentencia_preview || 'Texto íntegro en expediente judicial.')}
+        <div class="reading-section-heading">
+          <span>Texto y Considerandos de la Sentencia</span>
+          <span class="reading-hint">Selecciona texto y usa la barra de subrayado</span>
         </div>
+        <div class="document-reading-area">${UI.escapeHtml(f.texto_sentencia_preview || 'Texto íntegro en expediente judicial.')}</div>
       </div>
+
+      ${renderHighlightsSummaryMarkup()}
     `;
 
     footer.innerHTML = `
-      <button class="btn-action btn-action-gold" onclick="App.copyCitation('${UI.escapeHtml(cit)}')">
-        📋 Copiar Cita Canónica
+      <button type="button" class="btn-action btn-action-primary" onclick="App.copyCurrentCitation()">
+        Copiar Cita Formateada
       </button>
       ${f.url_acceso_sentencia ? `
-        <a href="${UI.escapeHtml(f.url_acceso_sentencia)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-action-primary">
-          📄 Abrir PDF Oficial PJUD
+        <a href="${UI.escapeHtml(f.url_acceso_sentencia)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-action-seal">
+          Abrir PDF Oficial PJUD ↗
         </a>
       ` : ''}
     `;
   }
 
   function renderCausaDetail(c, title, meta, citBox, body, footer) {
-    const cit = Citations.generateCausaCitation(c);
+    const cit = Citations.formatCitationByStyle('causa', c, state.citationStyle);
     title.textContent = c.caratulado || 'Expediente Judicial';
-    meta.textContent = `${c.tribunal || ''} • RIT: ${c.rit || 'S/R'}`;
+    meta.textContent = `${c.tribunal || ''} · RIT ${c.rit || 'S/R'}`;
     citBox.textContent = cit;
 
     body.innerHTML = `
       <div class="metadata-grid">
         <div class="metadata-item">
           <span class="metadata-item-label">RIT</span>
-          <span class="metadata-item-val" style="color:var(--gold-primary); font-family:var(--font-mono);">${UI.escapeHtml(c.rit || '')}</span>
+          <span class="metadata-item-val val-mono">${UI.escapeHtml(c.rit || '')}</span>
         </div>
         <div class="metadata-item">
           <span class="metadata-item-label">RUC</span>
-          <span class="metadata-item-val" style="font-family:var(--font-mono);">${UI.escapeHtml(c.ruc || 'No asignado')}</span>
+          <span class="metadata-item-val val-mono">${UI.escapeHtml(c.ruc || 'No asignado')}</span>
         </div>
         <div class="metadata-item">
           <span class="metadata-item-label">Tribunal</span>
@@ -712,45 +1015,47 @@ const App = (() => {
         </div>
         <div class="metadata-item">
           <span class="metadata-item-label">Fecha Ingreso</span>
-          <span class="metadata-item-val">${Citations.formatDateCL(c.fecha_ingreso)}</span>
+          <span class="metadata-item-val">${UI.escapeHtml(Citations.formatDateCL(c.fecha_ingreso))}</span>
         </div>
       </div>
 
       <div class="litigation-parties-box">
         <div class="litigation-side">
-          <h4>🔵 Demandante / Querellante / Fiscal:</h4>
+          <h4>Demandante / Querellante / Fiscal</h4>
           <p>${UI.escapeHtml(c.demandante_o_fiscal || 'No especificado')}</p>
         </div>
-        <div class="litigation-side">
-          <h4>🔴 Demandado / Imputado:</h4>
+        <div class="litigation-side side-defendant">
+          <h4>Demandado / Imputado</h4>
           <p>${UI.escapeHtml(c.demandado_o_imputado || 'No individualizado')}</p>
         </div>
       </div>
 
-      <div style="background:var(--bg-card); padding:18px; border-radius:var(--radius-md); border:1px solid var(--border-subtle);">
-        <strong style="font-size:0.75rem; text-transform:uppercase; color:var(--text-muted);">Materia o Delito en Disputa:</strong>
-        <p style="font-size:0.95rem; margin-top:6px; color:var(--text-main); font-weight:600;">
-          ${UI.escapeHtml(c.materia_o_delito || 'Materia no registrada')}
-        </p>
+      <div>
+        <div class="reading-section-heading">
+          <span>Materia o Delito en Disputa</span>
+        </div>
+        <div class="document-reading-area">${UI.escapeHtml(c.materia_o_delito || 'Materia no registrada')}</div>
       </div>
+
+      ${renderHighlightsSummaryMarkup()}
     `;
 
     footer.innerHTML = `
-      <button class="btn-action btn-action-gold" onclick="App.copyCitation('${UI.escapeHtml(cit)}')">
-        📋 Copiar Ficha de Causa
+      <button type="button" class="btn-action btn-action-primary" onclick="App.copyCurrentCitation()">
+        Copiar Ficha de Causa
       </button>
       ${c.url_expediente ? `
-        <a href="${UI.escapeHtml(c.url_expediente)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-action-primary">
-          🏛️ Ver Expediente en OJV
+        <a href="${UI.escapeHtml(c.url_expediente)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-action-seal">
+          Ver Expediente en OJV ↗
         </a>
       ` : ''}
     `;
   }
 
   function renderEspecialDetail(e, title, meta, citBox, body, footer) {
-    const cit = Citations.generateEspecialCitation(e);
+    const cit = Citations.formatCitationByStyle('especial', e, state.citationStyle);
     title.textContent = e.caratulado_titulo || 'Sentencia Especial';
-    meta.textContent = `${e.tribunal || ''} • Rol ${e.rol_causa || 'S/R'}`;
+    meta.textContent = `${e.tribunal || ''} · Rol ${e.rol_causa || 'S/R'}`;
     citBox.textContent = cit;
 
     body.innerHTML = `
@@ -761,7 +1066,7 @@ const App = (() => {
         </div>
         <div class="metadata-item">
           <span class="metadata-item-label">Rol de Causa</span>
-          <span class="metadata-item-val" style="color:var(--gold-primary); font-family:var(--font-mono);">${UI.escapeHtml(e.rol_causa || '')}</span>
+          <span class="metadata-item-val val-mono">${UI.escapeHtml(e.rol_causa || '')}</span>
         </div>
         <div class="metadata-item">
           <span class="metadata-item-label">Tipo Procedimiento</span>
@@ -769,41 +1074,44 @@ const App = (() => {
         </div>
         <div class="metadata-item">
           <span class="metadata-item-label">Fecha Dictación</span>
-          <span class="metadata-item-val">${Citations.formatDateCL(e.fecha_dictacion)}</span>
+          <span class="metadata-item-val">${UI.escapeHtml(Citations.formatDateCL(e.fecha_dictacion))}</span>
         </div>
       </div>
 
       <div>
-        <h4 style="font-size:0.85rem; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px;">Doctrina y Criterio Jurídico:</h4>
-        <div class="document-reading-area">
-          ${UI.escapeHtml(e.doctrina_resumen || 'Resolución disponible en registro oficial.')}
+        <div class="reading-section-heading">
+          <span>Doctrina y Criterio Jurídico</span>
+          <span class="reading-hint">Selecciona texto y usa la barra de subrayado</span>
         </div>
+        <div class="document-reading-area">${UI.escapeHtml(e.doctrina_resumen || 'Resolución disponible en registro oficial.')}</div>
       </div>
+
+      ${renderHighlightsSummaryMarkup()}
     `;
 
     footer.innerHTML = `
-      <button class="btn-action btn-action-gold" onclick="App.copyCitation('${UI.escapeHtml(cit)}')">
-        📋 Copiar Cita Canónica
+      <button type="button" class="btn-action btn-action-primary" onclick="App.copyCurrentCitation()">
+        Copiar Cita Formateada
       </button>
       ${e.url_origen ? `
-        <a href="${UI.escapeHtml(e.url_origen)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-action-primary">
-          🌐 Ver Sentencia Original
+        <a href="${UI.escapeHtml(e.url_origen)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-action-seal">
+          Ver Sentencia Original ↗
         </a>
       ` : ''}
     `;
   }
 
   function renderLeyDetail(l, title, meta, citBox, body, footer) {
-    const cit = Citations.generateLeyCitation(l);
-    title.textContent = l.titulo_norma || l.denominacion_oficial;
-    meta.textContent = `${l.tipo_norma || 'Norma'} N° ${l.numero_norma || 'S/N'} • ${l.organismo_emisor || ''}`;
+    const cit = Citations.formatCitationByStyle('ley', l, state.citationStyle);
+    title.textContent = l.titulo_norma || l.denominacion_oficial || 'Norma Legal';
+    meta.textContent = `${l.tipo_norma || 'Norma'} N° ${l.numero_norma || 'S/N'} · ${l.organismo_emisor || ''}`;
     citBox.textContent = cit;
 
     body.innerHTML = `
       <div class="metadata-grid">
         <div class="metadata-item">
           <span class="metadata-item-label">Tipo y Número</span>
-          <span class="metadata-item-val" style="color:var(--gold-primary);">${UI.escapeHtml(l.tipo_norma || '')} N° ${UI.escapeHtml(l.numero_norma || '')}</span>
+          <span class="metadata-item-val val-mono">${UI.escapeHtml(l.tipo_norma || '')} N° ${UI.escapeHtml(l.numero_norma || '')}</span>
         </div>
         <div class="metadata-item">
           <span class="metadata-item-label">Organismo Emisor</span>
@@ -811,45 +1119,48 @@ const App = (() => {
         </div>
         <div class="metadata-item">
           <span class="metadata-item-label">Publicación Diario Oficial</span>
-          <span class="metadata-item-val">${Citations.formatDateCL(l.fecha_publicacion)}</span>
+          <span class="metadata-item-val">${UI.escapeHtml(Citations.formatDateCL(l.fecha_publicacion))}</span>
         </div>
         <div class="metadata-item">
           <span class="metadata-item-label">Estado Vigencia</span>
-          <span class="metadata-item-val" style="color:var(--emerald-success); font-weight:700;">${UI.escapeHtml(l.estado_vigencia || 'Vigente')}</span>
+          <span class="metadata-item-val val-vigente">${UI.escapeHtml(l.estado_vigencia || 'Vigente')}</span>
         </div>
       </div>
 
       ${l.nombres_uso_comun ? `
-        <div style="background:rgba(212,175,55,0.08); border:1px solid rgba(212,175,55,0.3); padding:14px; border-radius:var(--radius-md);">
-          <strong style="font-size:0.75rem; text-transform:uppercase; color:var(--gold-primary);">Nombre de Uso Común:</strong>
-          <p style="font-size:1.05rem; font-weight:700; color:var(--text-gold); margin-top:2px;">⭐ ${UI.escapeHtml(l.nombres_uso_comun)}</p>
+        <div class="editorial-callout">
+          <span class="editorial-callout-label">Nombre de Uso Común</span>
+          <p>${UI.escapeHtml(l.nombres_uso_comun)}</p>
         </div>
       ` : ''}
 
       <div>
-        <h4 style="font-size:0.85rem; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px;">Resumen Analítico BCN:</h4>
-        <div class="document-reading-area">
-          ${UI.escapeHtml(l.resumen_analitico || l.denominacion_oficial || 'Texto sistematizado de la ley disponible en la Biblioteca del Congreso Nacional.')}
+        <div class="reading-section-heading">
+          <span>Resumen Analítico BCN</span>
+          <span class="reading-hint">Selecciona texto y usa la barra de subrayado</span>
         </div>
+        <div class="document-reading-area">${UI.escapeHtml(l.resumen_analitico || l.denominacion_oficial || 'Texto sistematizado de la ley disponible en la Biblioteca del Congreso Nacional.')}</div>
       </div>
+
+      ${renderHighlightsSummaryMarkup()}
     `;
 
     footer.innerHTML = `
-      <button class="btn-action btn-action-gold" onclick="App.copyCitation('${UI.escapeHtml(cit)}')">
-        📋 Copiar Cita Oficial
+      <button type="button" class="btn-action btn-action-primary" onclick="App.copyCurrentCitation()">
+        Copiar Cita Oficial
       </button>
       ${l.url_leychile ? `
-        <a href="${UI.escapeHtml(l.url_leychile)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-action-primary">
-          🏛️ Ver Texto Completo en LeyChile BCN
+        <a href="${UI.escapeHtml(l.url_leychile)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-action-seal">
+          Ver Texto Completo en LeyChile BCN ↗
         </a>
       ` : ''}
     `;
   }
 
   function renderDoctrinaAdminDetail(d, title, meta, citBox, body, footer) {
-    const cit = Citations.generateDoctrinaAdminCitation(d);
+    const cit = Citations.formatCitationByStyle('doctrina-admin', d, state.citationStyle);
     title.textContent = d.materia_resumen || 'Pronunciamiento Administrativo';
-    meta.textContent = `${d.organismo_emisor || ''} • ${d.tipo_documento || 'Dictamen'} N° ${d.numero_documento || ''}`;
+    meta.textContent = `${d.organismo_emisor || ''} · ${d.tipo_documento || 'Dictamen'} N° ${d.numero_documento || ''}`;
     citBox.textContent = cit;
 
     body.innerHTML = `
@@ -860,11 +1171,11 @@ const App = (() => {
         </div>
         <div class="metadata-item">
           <span class="metadata-item-label">Número Documento</span>
-          <span class="metadata-item-val" style="color:var(--gold-primary); font-family:var(--font-mono);">${UI.escapeHtml(d.numero_documento || '')}</span>
+          <span class="metadata-item-val val-mono">${UI.escapeHtml(d.numero_documento || '')}</span>
         </div>
         <div class="metadata-item">
           <span class="metadata-item-label">Fecha Emisión</span>
-          <span class="metadata-item-val">${Citations.formatDateCL(d.fecha_documento)}</span>
+          <span class="metadata-item-val">${UI.escapeHtml(Citations.formatDateCL(d.fecha_documento))}</span>
         </div>
         <div class="metadata-item">
           <span class="metadata-item-label">Fuentes Legales</span>
@@ -873,29 +1184,32 @@ const App = (() => {
       </div>
 
       <div>
-        <h4 style="font-size:0.85rem; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px;">Texto y Criterio del Dictamen:</h4>
-        <div class="document-reading-area">
-          ${UI.escapeHtml(d.texto_completo_o_extracto || 'Contenido del dictamen disponible en organismo emisor.')}
+        <div class="reading-section-heading">
+          <span>Texto y Criterio del Dictamen</span>
+          <span class="reading-hint">Selecciona texto y usa la barra de subrayado</span>
         </div>
+        <div class="document-reading-area">${UI.escapeHtml(d.texto_completo_o_extracto || 'Contenido del dictamen disponible en organismo emisor.')}</div>
       </div>
+
+      ${renderHighlightsSummaryMarkup()}
     `;
 
     footer.innerHTML = `
-      <button class="btn-action btn-action-gold" onclick="App.copyCitation('${UI.escapeHtml(cit)}')">
-        📋 Copiar Cita
+      <button type="button" class="btn-action btn-action-primary" onclick="App.copyCurrentCitation()">
+        Copiar Cita Formateada
       </button>
       ${d.url_origen ? `
-        <a href="${UI.escapeHtml(d.url_origen)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-action-primary">
-          🌐 Ver en Portal Oficial
+        <a href="${UI.escapeHtml(d.url_origen)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-action-seal">
+          Ver en Portal Oficial ↗
         </a>
       ` : ''}
     `;
   }
 
   function renderDoctrinaJuridicaDetail(a, title, meta, citBox, body, footer) {
-    const cit = Citations.generateDoctrinaJuridicaCitation(a);
+    const cit = Citations.formatCitationByStyle('doctrina-juridica', a, state.citationStyle);
     title.textContent = a.titulo || 'Artículo Doctrinal';
-    meta.textContent = `${a.autores || ''} • ${a.revista_o_fuente || ''} (${a.anio_publicacion || ''})`;
+    meta.textContent = `${a.autores || ''} · ${a.revista_o_fuente || ''} (${a.anio_publicacion || ''})`;
     citBox.textContent = cit;
 
     body.innerHTML = `
@@ -919,20 +1233,23 @@ const App = (() => {
       </div>
 
       <div>
-        <h4 style="font-size:0.85rem; text-transform:uppercase; color:var(--text-muted); margin-bottom:10px;">Resumen / Abstract Doctrinal:</h4>
-        <div class="document-reading-area">
-          ${UI.escapeHtml(a.resumen_abstract || a.texto_completo_o_extracto || 'Artículo de doctrina jurídica chilena.')}
+        <div class="reading-section-heading">
+          <span>Resumen / Abstract Doctrinal</span>
+          <span class="reading-hint">Selecciona texto y usa la barra de subrayado</span>
         </div>
+        <div class="document-reading-area">${UI.escapeHtml(a.resumen_abstract || a.texto_completo_o_extracto || 'Artículo de doctrina jurídica chilena.')}</div>
       </div>
+
+      ${renderHighlightsSummaryMarkup()}
     `;
 
     footer.innerHTML = `
-      <button class="btn-action btn-action-gold" onclick="App.copyCitation('${UI.escapeHtml(cit)}')">
-        📋 Copiar Cita Bibliográfica
+      <button type="button" class="btn-action btn-action-primary" onclick="App.copyCurrentCitation()">
+        Copiar Cita Bibliográfica
       </button>
       ${a.doi_o_url ? `
-        <a href="${UI.escapeHtml(a.doi_o_url)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-action-primary">
-          🔗 Ver Publicación Original
+        <a href="${UI.escapeHtml(a.doi_o_url)}" target="_blank" rel="noopener noreferrer" class="btn-action btn-action-seal">
+          Ver Publicación Original ↗
         </a>
       ` : ''}
     `;
@@ -940,18 +1257,14 @@ const App = (() => {
 
   function renderFormatoDetail(fmt, title, meta, citBox, body, footer) {
     title.textContent = fmt.titulo || 'Plantilla Forense';
-    meta.textContent = `${fmt.categoria || 'Civil'} • ${fmt.tipo_documento || 'Escrito'} • Sugerido: ${fmt.tribunal_sugerido || 'Tribunal de Letras'}`;
-    citBox.textContent = `Escrito forense: «${fmt.titulo}». Normativa: ${fmt.normativa_asociada || 'Reglas procesales vigentes'}.`;
+    meta.textContent = `${fmt.categoria || 'Civil'} · ${fmt.tipo_documento || 'Escrito'} · Sugerido: ${fmt.tribunal_sugerido || 'Tribunal de Letras'}`;
+    citBox.textContent = Citations.formatCitationByStyle('formato', fmt, state.citationStyle);
 
     body.innerHTML = `
       <div class="template-editor-box">
-        <div style="display:flex; align-items:center; justify-content:space-between; gap:10px;">
-          <span style="font-size:0.8rem; color:var(--text-muted);">
-            Edita directamente en esta caja para adaptar el escrito a tu causa:
-          </span>
-          <span style="font-size:0.75rem; color:var(--gold-primary); font-weight:600;">
-            Sumilla: EN LO PRINCIPAL: ${UI.escapeHtml(fmt.sumilla || 'Demanda')}
-          </span>
+        <div class="template-editor-meta">
+          <span>Edita directamente el borrador para adaptar el escrito a tu causa:</span>
+          <span class="template-sumilla">EN LO PRINCIPAL: ${UI.escapeHtml(fmt.sumilla || 'Demanda')}</span>
         </div>
 
         <textarea id="templateContentEditor" class="template-textarea">${UI.escapeHtml(fmt.contenido_template || '')}</textarea>
@@ -959,11 +1272,11 @@ const App = (() => {
     `;
 
     footer.innerHTML = `
-      <button class="btn-action btn-action-gold" onclick="App.copyEditedTemplate()">
-        📋 Copiar Escrito para Presentar
+      <button type="button" class="btn-action btn-action-primary" onclick="App.copyEditedTemplate()">
+        Copiar Escrito para Presentar
       </button>
-      <button class="btn-action btn-action-primary" onclick="App.downloadTemplateFile('${UI.escapeHtml(fmt.titulo || 'Escrito')}')">
-        💾 Descargar Escrito (.txt)
+      <button type="button" class="btn-action btn-action-seal" onclick="App.downloadTemplateFile('${UI.escapeHtml(fmt.titulo || 'Escrito')}')">
+        Descargar Escrito (.txt)
       </button>
     `;
   }
@@ -987,15 +1300,19 @@ const App = (() => {
   }
 
   function closeModal() {
-    const modal = document.getElementById('documentModal');
-    if (modal) {
-      modal.classList.remove('open');
+    const drawer = document.getElementById('documentModal');
+    if (drawer) {
+      drawer.classList.remove('open');
     }
+    document.body.classList.remove('drawer-open', 'drawer-expanded');
+    state.activeDocId = null;
+    state.activeDocType = null;
+    state.activeDocData = null;
+    syncSelectedCardUI(null);
   }
 
   // Configuración de Eventos del DOM
   function setupEventListeners() {
-    // Input de búsqueda Omnisearch
     const searchInput = document.getElementById('omniSearchInput');
     const searchBtn = document.getElementById('btnSearch');
 
@@ -1029,17 +1346,14 @@ const App = (() => {
       });
     }
 
-    // Modal close al presionar ESC o click fuera
+    // Cerrar Drawer al presionar ESC
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape') closeModal();
+      if (e.key === 'Escape') {
+        closeModal();
+        const sidebar = document.getElementById('filtersSidebar');
+        if (sidebar) sidebar.classList.remove('mobile-open');
+      }
     });
-
-    const modal = document.getElementById('documentModal');
-    if (modal) {
-      modal.addEventListener('click', (e) => {
-        if (e.target === modal) closeModal();
-      });
-    }
   }
 
   return {
@@ -1047,8 +1361,17 @@ const App = (() => {
     switchTab,
     onFilterChange,
     clearAllFilters,
+    toggleMobileFilters,
     goToPage,
     copyCitation,
+    copyCitationFromBtn,
+    copyCurrentCitation,
+    setCitationStyle,
+    toggleDrawerWidth,
+    adjustReadingFont,
+    applyHighlight,
+    clearHighlights,
+    copyHighlightedExcerpts,
     openDetail,
     copyEditedTemplate,
     downloadTemplateFile,
